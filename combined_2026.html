@@ -20,6 +20,7 @@ body{display:flex;flex-direction:column;}
 .tab-panel{display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0;}
 .tab-panel.active{display:flex;}
 /* Tab 1 scoped styles */
+#tab1 { --row-h: 34px; --label-show: 1; }
 #tab1 { 
   :root {
     --bg: #0d0f14;
@@ -284,7 +285,6 @@ body{display:flex;flex-direction:column;}
   }
 
   /* ── row height control ── */
-  :root { --row-h: 34px; --label-show: 1; }
 
   .gantt-row {
     display: flex;
@@ -1012,7 +1012,7 @@ render1_inner();
 function updateRowHeight(val) {
   val = parseInt(val);
   document.getElementById('rowHeightVal').textContent = val + 'px';
-  document.documentElement.style.setProperty('--row-h', val + 'px');
+  document.getElementById('tab1').style.setProperty('--row-h', val + 'px');
 
   const inner = document.getElementById('ganttInner');
   // label visibility modes based on height
@@ -1032,7 +1032,7 @@ function updateRowHeight(val) {
 
   // also scale bar height proportionally
   const barH = Math.max(4, Math.round(val * 0.52));
-  document.querySelectorAll('.bar').forEach(b => {
+  document.querySelectorAll('#tab1 .bar').forEach(b => {
     b.style.height = barH + 'px';
   });
 }
@@ -1050,6 +1050,18 @@ function toggleTheme1() {
 }
 
 window._tab1 = { render: render1_inner };
+window.updateRowHeight = function(val) {
+  val = parseInt(val);
+  document.getElementById('rowHeightVal').textContent = val + 'px';
+  document.getElementById('tab1').style.setProperty('--row-h', val + 'px');
+  const inner = document.getElementById('ganttInner');
+  if (!inner) return;
+  if (val <= 16) { inner.classList.add('no-labels'); inner.classList.remove('compact-labels'); }
+  else if (val <= 26) { inner.classList.add('compact-labels'); inner.classList.remove('no-labels'); }
+  else { inner.classList.remove('no-labels','compact-labels'); }
+  const barH = Math.max(4, Math.round(val * 0.52));
+  document.querySelectorAll('#tab1 .bar').forEach(b => b.style.height = barH + 'px');
+};
 })();
 
 // ── Tab 2 ──────────────────────────────────────────────────────────────────
