@@ -4,24 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Post Production 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Unbounded:wght@300;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Unbounded:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.26.0/dist/tabler-icons.min.css" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--accent:#00d4aa;--bg:#0d0f14;--surface:#151820;--border:#1e2330;--text:#e8eaf0;--muted:#4a5060;}
+:root{--bg:#0d0f14;--surface:#151820;--border:#1e2330;--text:#e8eaf0;--muted:#4a5060;--accent:#00d4aa;}
 :root.light{--bg:#f4f5f7;--surface:#fff;--border:#dde1ea;--text:#1a1d26;--muted:#8a93a8;--accent:#00a887;}
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:"JetBrains Mono",monospace;font-size:12px;}
-body{display:flex;flex-direction:column;}
-.tab-bar{display:flex;align-items:center;height:46px;flex-shrink:0;border-bottom:2px solid var(--border);background:var(--surface);padding:0 24px;position:relative;z-index:200;}
-.tab-btn{font-family:"Unbounded",sans-serif;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:0 18px;height:100%;border:none;background:none;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;}
-.tab-btn:hover{color:var(--text);}
-.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
-.global-theme{margin-left:auto;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:"JetBrains Mono",monospace;font-size:11px;padding:4px 11px;border-radius:6px;cursor:pointer;}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:"JetBrains Mono",monospace;font-size:12px;max-width:1100px;margin:0 auto;}
+.main-nav{position:sticky;top:0;z-index:1000;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;height:46px;padding:0 20px;}
+.nav-logo{font-family:"Unbounded",sans-serif;font-size:11px;font-weight:600;color:var(--accent);margin-right:20px;white-space:nowrap;flex-shrink:0;}
+.nav-links{display:flex;flex:1;overflow-x:auto;}
+.nav-links::-webkit-scrollbar{display:none;}
+.nav-link{font-size:10px;color:var(--muted);text-decoration:none;padding:0 14px;height:46px;display:flex;align-items:center;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;}
+.nav-link:hover{color:var(--text);}
+.nav-link.active{color:var(--accent);border-bottom-color:var(--accent);}
+.global-theme{flex-shrink:0;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:"JetBrains Mono",monospace;font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;}
 .global-theme:hover{border-color:var(--accent);color:var(--accent);}
-.tab-panel{display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0;}
-.tab-panel.active{display:flex;}
-/* Tab 1 scoped styles */
-#tab1 { --row-h: 34px; --label-show: 1; }
-#tab1 { 
+.sec-gantt{display:flex;flex-direction:column;overflow:hidden;border-bottom:3px solid var(--border);}
+.sec-scroll{padding:28px 0;border-bottom:3px solid var(--border);}
+.sec-scroll:last-child{border-bottom:none;}
+#sec1{--row-h:34px;--label-show:1;}
+#sec1 .gantt-scroll-y{overflow-y:auto;overflow-x:auto;}
+
+#sec1 { 
   :root {
     --bg: #0d0f14;
     --surface: #151820;
@@ -119,7 +125,7 @@ body{display:flex;flex-direction:column;}
 
 
   .gantt-inner {
-    min-width: 1400px;
+    min-width: 900px;
     position: relative;
   }
 
@@ -140,13 +146,13 @@ body{display:flex;flex-direction:column;}
   .load-row {
     display: flex;
     border-bottom: 2px solid var(--border);
-    height: 48px;
+    height: var(--row-h);
     background: var(--bg);
     position: relative;
   }
 
   .row-label-col {
-    width: 260px; min-width: 260px; flex-shrink: 0;
+    width: 230px; min-width: 230px; flex-shrink: 0;
     padding: 8px 12px;
     border-right: 1px solid var(--border);
     color: var(--muted);
@@ -252,6 +258,14 @@ body{display:flex;flex-direction:column;}
     letter-spacing: .05em; text-transform: uppercase;
   }
 
+  .toggle-btn {
+    cursor:pointer;background:none;border:1px solid currentColor;
+    border-radius:3px;font-size:8px;padding:1px 4px;
+    font-family:inherit;opacity:.55;line-height:1.3;
+    margin-left:auto;flex-shrink:0;
+  }
+  .toggle-btn:hover{opacity:1;}
+
   .tooltip {
     display: none; position: fixed;
     background: var(--surface); border: 1px solid var(--accent);
@@ -302,17 +316,17 @@ body{display:flex;flex-direction:column;}
     transition: height .2s;
   }
   .row-label {
-    width: 260px; min-width: 260px; flex-shrink: 0;
+    width: 230px; min-width: 230px; flex-shrink: 0;
     padding: 4px 12px;
     border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; gap: 2px;
-    justify-content: center;
+    display: flex; flex-direction: row; align-items: center; gap: 6px;
     position: sticky; left: 0;
     background: var(--surface); z-index: 5;
     height: 100%;
     overflow: hidden;
     transition: width .2s, min-width .2s;
   }
+  .row-label-text { display: flex; flex-direction: column; gap: 2px; flex: 1; overflow: hidden; }
 
   /* compact: hide show-name sub-label */
   .compact-labels .row-show { display: none; }
@@ -349,9 +363,14 @@ body{display:flex;flex-direction:column;}
   }
 
  }
-/* Tab 2 scoped styles */
-#tab2 { 
+#sec2 { 
 :root{--bg:#0d0f14;--surface:#151820;--border:#1e2330;--text:#e8eaf0;--muted:#4a5060;--accent:#00d4aa;--lw:220px;--rh:30px;}
+#sec2 .gantt-wrap { display:block!important; height:auto!important; }
+#sec2 .g-left { position:absolute; overflow:hidden!important; width:230px; top:0; left:0; bottom:auto!important; height:auto!important; }
+#sec2 .g-right-wrap { margin-left:230px; overflow-x:auto!important; height:auto!important; }
+#sec2 .g-right { min-width:870px; }
+#sec2 .gantt-wrap { position:relative; }
+
 :root.light{--bg:#f4f5f7;--surface:#ffffff;--border:#dde1ea;--text:#1a1d26;--muted:#8a93a8;--accent:#00a887;}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px}
@@ -463,25 +482,289 @@ select{background:var(--surface);border:1px solid var(--border);color:var(--text
 .tooltip.vis{display:block}
 .tt-show{color:var(--accent);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.08em}
  }
+#sec3,#sec4,#sec5 { max-width:1060px;margin:0 auto;padding:28px; }
+#sec3 { 
+:root{--bg:#0d0f14;--surface:#151820;--border:#1e2330;--text:#e8eaf0;--muted:#4a5060;--accent:#00d4aa;}
+:root.light{--bg:#f4f5f7;--surface:#ffffff;--border:#dde1ea;--text:#1a1d26;--muted:#8a93a8;--accent:#00a887;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:28px;min-height:100vh;}
+
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+h1{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:600;color:var(--accent);}
+.theme-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* HEAD */
+.head-wrap{display:flex;justify-content:center;margin-bottom:8px;}
+.head-card{
+  background:var(--surface);
+  border:1px solid rgba(127,119,221,.4);
+  border-top:3px solid #7F77DD;
+  border-radius:10px;padding:0;
+  width:340px;overflow:hidden;
+}
+.head-card-top{
+  background:rgba(127,119,221,.1);
+  padding:14px 18px 12px;
+  display:flex;align-items:center;gap:12px;
+}
+.head-avatar{
+  width:38px;height:38px;border-radius:8px;
+  background:rgba(127,119,221,.2);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.head-avatar i{font-size:20px;color:#7F77DD;}
+.head-title-wrap{}
+.head-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#7F77DD;margin-bottom:2px;}
+.head-name{font-size:13px;font-weight:600;color:var(--text);}
+.head-bullets{padding:12px 18px 14px;display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;}
+.hb{font-size:10px;color:var(--muted);line-height:1.5;padding-left:10px;position:relative;}
+.hb::before{content:'·';position:absolute;left:0;color:var(--border);}
+
+/* connector */
+.connector-svg{display:block;margin:0 auto;overflow:visible;}
+
+/* section label */
+.section-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;}
+
+/* columns */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.col{display:flex;flex-direction:column;gap:0;}
+
+/* role card */
+.rcard{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;
+  transition:border-color .2s;
+}
+.rcard:hover{border-color:var(--muted);}
+
+.rcard-header{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px 10px;
+  border-bottom:1px solid var(--border);
+}
+.rcard-ico{
+  width:32px;height:32px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.rcard-ico i{font-size:16px;}
+.rcard-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px;}
+.rcard-name{font-size:12px;font-weight:600;color:var(--text);}
+
+.rcard-body{padding:10px 14px 12px;}
+.rcard-bullet{
+  font-size:10px;color:var(--muted);line-height:1.65;
+  padding-left:10px;position:relative;margin-bottom:1px;
+}
+.rcard-bullet::before{content:'·';position:absolute;left:0;}
+
+.rcard-footer{
+  padding:8px 14px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;
+}
+.badge{
+  font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;
+  letter-spacing:.04em;
+}
+
+/* arrow between lead → junior */
+.arrow-row{
+  display:flex;justify-content:center;align-items:center;
+  height:28px;
+}
+.arrow-row svg{opacity:.35;}
+
+/* teal */
+.t-teal .rcard-header{background:rgba(29,158,117,.08);border-bottom-color:rgba(29,158,117,.2);}
+.t-teal .rcard{border-color:rgba(29,158,117,.25);}
+.t-teal .rcard:hover{border-color:rgba(29,158,117,.5);}
+.t-teal .rcard-ico{background:rgba(29,158,117,.15);color:#1D9E75;}
+.t-teal .rcard-label{color:#1D9E75;}
+.t-teal .badge{background:rgba(29,158,117,.12);color:#1D9E75;}
+
+/* coral */
+.t-coral .rcard-header{background:rgba(216,90,48,.08);border-bottom-color:rgba(216,90,48,.2);}
+.t-coral .rcard{border-color:rgba(216,90,48,.25);}
+.t-coral .rcard:hover{border-color:rgba(216,90,48,.5);}
+.t-coral .rcard-ico{background:rgba(216,90,48,.12);color:#D85A30;}
+.t-coral .rcard-label{color:#D85A30;}
+.t-coral .badge{background:rgba(216,90,48,.12);color:#D85A30;}
+
+/* divider */
+.divider{height:1px;background:var(--border);margin:20px 0;}
+ }
+#sec4 { 
+:root{--bg:#0d0f14;--surface:#151820;--border:#1e2330;--text:#e8eaf0;--muted:#4a5060;--accent:#00d4aa;}
+:root.light{--bg:#f4f5f7;--surface:#fff;--border:#dde1ea;--text:#1a1d26;--muted:#8a93a8;--accent:#00a887;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:24px;min-height:100vh;}
+
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+h1{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:600;color:var(--accent);}
+.theme-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+.section-title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:20px 0 10px;}
+
+.grid{display:grid;gap:10px;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-1{grid-template-columns:1fr;}
+
+.card{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);}
+
+.card-header{padding:10px 14px 9px;border-bottom:1px solid var(--border);}
+.card-role{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;}
+.card-name{font-size:13px;font-weight:600;color:var(--text);}
+
+.card-body{padding:12px 14px;}
+
+.item{display:flex;align-items:flex-start;gap:9px;margin-bottom:9px;}
+.item:last-of-type{margin-bottom:0;}
+.ico{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.ico i{font-size:12px;}
+.item-text{}
+.item-label{font-size:11px;font-weight:600;color:var(--text);line-height:1.3;}
+.item-sub{font-size:10px;color:var(--muted);line-height:1.5;margin-top:1px;}
+
+.tag{display:inline-block;font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:8px;letter-spacing:.04em;}
+
+/* teal */
+.c-teal .card-header{background:rgba(29,158,117,.12);border-bottom-color:rgba(29,158,117,.2);}
+.c-teal{border-color:rgba(29,158,117,.3);}
+.c-teal .card-role{color:#1D9E75;}
+.ico-teal{background:rgba(29,158,117,.15);color:#1D9E75;}
+.tag-teal{background:rgba(29,158,117,.15);color:#1D9E75;}
+
+/* coral */
+.c-coral .card-header{background:rgba(216,90,48,.1);border-bottom-color:rgba(216,90,48,.2);}
+.c-coral{border-color:rgba(216,90,48,.3);}
+.c-coral .card-role{color:#D85A30;}
+.ico-coral{background:rgba(216,90,48,.12);color:#D85A30;}
+.tag-coral{background:rgba(216,90,48,.12);color:#D85A30;}
+
+/* purple */
+.c-purple .card-header{background:rgba(127,119,221,.1);border-bottom-color:rgba(127,119,221,.2);}
+.c-purple{border-color:rgba(127,119,221,.3);}
+.c-purple .card-role{color:#7F77DD;}
+.ico-purple{background:rgba(127,119,221,.12);color:#7F77DD;}
+.tag-purple{background:rgba(127,119,221,.12);color:#7F77DD;}
+
+/* gray */
+.ico-gray{background:rgba(100,100,100,.12);color:var(--muted);}
+
+.divider{height:1px;background:var(--border);margin:20px 0;}
+
+.budget-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.budget-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.budget-item{background:var(--bg);border-radius:7px;padding:8px 10px;}
+.budget-item-label{font-size:9px;color:var(--muted);margin-bottom:3px;line-height:1.4;}
+.budget-item-val{font-size:13px;font-weight:600;color:var(--text);}
+.budget-total-row{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);}
+.budget-total-label{font-size:10px;color:var(--muted);}
+.budget-total-val{font-size:16px;font-weight:600;color:var(--accent);}
+.budget-note{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6;}
+ }
+#sec5 { 
+:root{--bg:#0d0f14;--surface:#151820;--border:#1e2330;--text:#e8eaf0;--muted:#4a5060;--accent:#00d4aa;}
+:root.light{--bg:#f4f5f7;--surface:#fff;--border:#dde1ea;--text:#1a1d26;--muted:#8a93a8;--accent:#00a887;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:28px;min-height:100vh;}
+
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+h1{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:600;color:var(--accent);}
+.theme-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+.section-title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:20px 0 10px;}
+
+/* episodes grid */
+.eps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:4px;}
+.ep-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.ep-show{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.ep-count{font-size:22px;font-weight:700;line-height:1;}
+.ep-label{font-size:10px;color:var(--muted);margin-top:3px;}
+.ep-price{font-size:11px;font-weight:600;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);}
+
+/* comparison grid */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+.col-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.col-header{padding:14px 16px 12px;border-bottom:1px solid var(--border);}
+.col-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;}
+.col-title{font-size:13px;font-weight:600;color:var(--text);}
+.col-body{padding:14px 16px;}
+
+.line-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);}
+.line-item:last-child{border-bottom:none;}
+.li-label{font-size:11px;color:var(--muted);}
+.li-sub{font-size:9px;color:var(--muted);opacity:.7;margin-top:1px;}
+.li-val{font-size:11px;font-weight:600;color:var(--text);text-align:right;}
+.li-val.green{color:#1D9E75;}
+.li-val.muted{color:var(--muted);}
+
+.total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:2px solid var(--border);margin-top:4px;}
+.total-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.total-val{font-size:18px;font-weight:700;}
+
+/* savings banner */
+.savings{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;
+}
+.saving-card{
+  border-radius:10px;padding:16px 18px;
+  display:flex;align-items:center;gap:14px;
+}
+.saving-card.y1{background:rgba(29,158,117,.1);border:1px solid rgba(29,158,117,.25);}
+.saving-card.y2{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);}
+.saving-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;}
+.saving-ico.y1{background:rgba(29,158,117,.15);color:#1D9E75;}
+.saving-ico.y2{background:rgba(0,212,170,.12);color:var(--accent);}
+.saving-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.saving-label.y1{color:#1D9E75;}
+.saving-label.y2{color:var(--accent);}
+.saving-amount{font-size:20px;font-weight:700;line-height:1;}
+.saving-amount.y1{color:#1D9E75;}
+.saving-amount.y2{color:var(--accent);}
+.saving-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+
+/* year toggle */
+.year-toggle{display:flex;gap:6px;margin-bottom:14px;}
+.ytab{background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 14px;border-radius:6px;cursor:pointer;transition:all .15s;}
+.ytab.active{background:rgba(0,212,170,.1);border-color:var(--accent);color:var(--accent);}
+
+.note{font-size:10px;color:var(--muted);margin-top:14px;line-height:1.6;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
+
+.divider{height:1px;background:var(--border);margin:20px 0;}
+ }
 </style>
 </head>
 <body>
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab(0)">📅 Сценарии 2026</button>
-  <button class="tab-btn" onclick="switchTab(1)">👥 Загрузка команды</button>
+<nav class="main-nav">
+  <span class="nav-logo">POST PRODUCTION 2026</span>
+  <div class="nav-links">
+    <a class="nav-link" href="#sec1">📅 Проекты</a>
+    <a class="nav-link" href="#sec2">👥 Загрузка</a>
+    <a class="nav-link" href="#sec3">🎬 Команда</a>
+    <a class="nav-link" href="#sec4">🖥 Оборудование</a>
+    <a class="nav-link" href="#sec5">💰 Бюджет</a>
+  </div>
   <button class="global-theme" id="globalTheme" onclick="toggleGlobalTheme()">☀ Светлая</button>
-</div>
-<div class="tab-panel active" id="tab1"><header>
+</nav>
+<div class="sec-gantt" id="sec1"><header>
   <h1>СЦЕНАРИИ 2026</h1>
   <span>Дата начала → Дата окончания сценария</span>
-  <button class="theme-toggle"  id="tab1_themeBtn">☀ Светлая</button>
+  
 </header>
 
 <div class="legend" id="legend"></div>
 
 <div class="filter-bar">
   <label>Период:</label>
-  <select id="monthFilter" onchange="if(window._tab1)window._tab1.render()">
+  <select id="monthFilter" onchange="window._render1()">
     <option value="all">Весь год</option>
     <option value="1">Янв</option><option value="2">Фев</option>
     <option value="3">Мар</option><option value="4">Апр</option>
@@ -492,13 +775,8 @@ select{background:var(--surface);border:1px solid var(--border);color:var(--text
   </select>
   <div class="height-control">
     <label>Высота строк:</label>
-    <input type="range" id="rowHeightSlider" min="12" max="48" value="34" step="1" oninput="updateRowHeight(this.value)">
+    <input type="range" id="rowHeightSlider" min="12" max="48" value="34" step="1" oninput="window._updateRowHeight(this.value)">
     <span class="height-val" id="rowHeightVal">34px</span>
-  </div>
-  <div class="height-control">
-    <label>Масштаб:</label>
-    <input type="range" id="tab1_zoom" min="750" max="4000" value="1400" step="50" oninput="setZoom1(this.value)">
-    <span class="height-val" id="tab1_zoomVal">1400px</span>
   </div>
 </div>
 
@@ -509,10 +787,10 @@ select{background:var(--surface);border:1px solid var(--border);color:var(--text
 </div>
 
 <div class="tooltip" id="tooltip"></div></div>
-<div class="tab-panel" id="tab2"><header>
+<div class="sec-gantt" id="sec2"><header>
   <h1>ЗАГРУЗКА КОМАНДЫ 2026</h1>
   <span>Post Production Department</span>
-  <button class="theme-btn" id="tab2_themeBtn" >☀ Светлая</button>
+  
 </header>
 <div class="legend">
   <div class="li"><div class="ldot" style="background:#E05C28"></div>Pognali</div>
@@ -523,7 +801,7 @@ select{background:var(--surface);border:1px solid var(--border);color:var(--text
 </div>
 <div class="controls">
   <label>Период:</label>
-  <select id="tab2_mf" onchange="if(window._tab2)window._tab2.render()">
+  <select id="t2_mf" onchange="window._render2()">
     <option value="all">Весь год</option>
     <option value="1">Янв</option><option value="2">Фев</option>
     <option value="3">Мар</option><option value="4">Апр</option>
@@ -534,52 +812,653 @@ select{background:var(--surface);border:1px solid var(--border);color:var(--text
   </select>
   <div class="hctl">
     <label>Высота:</label>
-    <input type="range" id="tab2_rh" min="14" max="48" value="30" step="1" oninput="setH2(this.value)">
-    <span class="hval" id="tab2_rhv">30px</span>
-  </div>
-  <div class="hctl">
-    <label>Масштаб:</label>
-    <input type="range" id="tab2_zoom" min="500" max="4000" value="900" step="50" oninput="setZoom2(this.value)">
-    <span class="hval" id="tab2_zoomVal">900px</span>
+    <input type="range" id="t2_rh" min="14" max="48" value="30" step="1" oninput="if(window._setH2)window._setH2(this.value)">
+    <span class="hval" id="t2_rhv">30px</span>
   </div>
 </div>
-<div class="gantt-wrap">
-  <div class="g-left" id="tab2_gL"></div>
-  <div class="g-right-wrap" id="tab2_gRW">
-    <div class="g-right" id="tab2_gR"></div>
+<div style="overflow-x:auto;"><div id="t2_container" style="min-width:900px;position:relative;"></div></div>
+<div class="tooltip" id="t2_tt"></div></div>
+<div class="sec-scroll" id="sec3"><div class="top">
+  <h1>POST PRODUCTION DEPARTMENT</h1>
+  
+</div>
+
+<!-- HEAD -->
+<div class="head-wrap">
+  <div class="head-card">
+    <div class="head-card-top">
+      <div class="head-avatar"><i class="ti ti-crown"></i></div>
+      <div class="head-title-wrap">
+        <div class="head-label">Head of Post Production</div>
+        <div class="head-name">Руководитель отдела</div>
+      </div>
+    </div>
+    <div class="head-bullets">
+      <div class="hb">Технический и творческий надзор</div>
+      <div class="hb">Коммуникации с продюсерами</div>
+      <div class="hb">Просмотр всех выпусков и стадий</div>
+      <div class="hb">Финальное визирование материала</div>
+      <div class="hb">Коммуникации с авторами каналов</div>
+      <div class="hb">Приём и выдача исходников</div>
+      <div class="hb">Архивация материалов</div>
+    </div>
   </div>
 </div>
-<div class="tooltip" id="tab2_tt"></div></div>
+
+<!-- connector lines -->
+<svg class="connector-svg" width="100%" height="36">
+  <line x1="50%" y1="0" x2="50%" y2="18" stroke="#1e2330" stroke-width="1"/>
+  <line x1="25%" y1="18" x2="75%" y2="18" stroke="#1e2330" stroke-width="1"/>
+  <line x1="25%" y1="18" x2="25%" y2="36" stroke="#1e2330" stroke-width="1"/>
+  <line x1="75%" y1="18" x2="75%" y2="36" stroke="#1e2330" stroke-width="1"/>
+</svg>
+
+<!-- COLUMNS -->
+<div class="cols">
+
+  <!-- МОНТАЖ -->
+  <div class="col t-teal">
+    <div class="section-label">Монтаж</div>
+
+    <div class="rcard">
+      <div class="rcard-header">
+        <div class="rcard-ico"><i class="ti ti-cut"></i></div>
+        <div>
+          <div class="rcard-label">Lead Editor</div>
+          <div class="rcard-name">Гл. монтажёр</div>
+        </div>
+      </div>
+      <div class="rcard-body">
+        <div class="rcard-bullet">Монтирует эпизоды наравне с Editor (50/50)</div>
+        <div class="rcard-bullet">Определяет монтажный стиль каждого шоу</div>
+        <div class="rcard-bullet">Создаёт референсы и шаблоны для команды</div>
+        <div class="rcard-bullet">Проверяет работу Editor до сдачи Head</div>
+        <div class="rcard-bullet">Сигнализирует о рисках по срокам</div>
+      </div>
+      <div class="rcard-footer">
+        <span class="badge"><i class="ti ti-device-laptop" style="font-size:9px;margin-right:3px"></i>Свой ноутбук</span>
+        <span class="badge"><i class="ti ti-building" style="font-size:9px;margin-right:3px"></i>Офис</span>
+        <span class="badge" style="margin-left:auto;background:rgba(29,158,117,.15);color:#1D9E75;border-color:rgba(29,158,117,.3)">150 000 – 200 000 ₽/мес</span>
+      </div>
+    </div>
+
+    <div class="arrow-row">
+      <svg width="16" height="28" viewBox="0 0 16 28">
+        <path d="M8 0v22M3 17l5 7 5-7" stroke="#4a5060" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="rcard">
+      <div class="rcard-header">
+        <div class="rcard-ico"><i class="ti ti-scissors"></i></div>
+        <div>
+          <div class="rcard-label">Editor</div>
+          <div class="rcard-name">Монтажёр</div>
+        </div>
+      </div>
+      <div class="rcard-body">
+        <div class="rcard-bullet">Монтирует эпизоды наравне с Lead (50/50)</div>
+        <div class="rcard-bullet">Работает по референсам Lead Editor</div>
+        <div class="rcard-bullet">Сдаёт сборки на проверку Lead Editor</div>
+        <div class="rcard-bullet">Синхронизирует видео и звук</div>
+      </div>
+      <div class="rcard-footer">
+        <span class="badge"><i class="ti ti-device-laptop" style="font-size:9px;margin-right:3px"></i>Свой ноутбук</span>
+        <span class="badge"><i class="ti ti-building" style="font-size:9px;margin-right:3px"></i>Офис</span>
+        <span class="badge" style="margin-left:auto;background:rgba(29,158,117,.15);color:#1D9E75;border-color:rgba(29,158,117,.3)">120 000 – 150 000 ₽/мес</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- АНИМАЦИЯ -->
+  <div class="col t-coral">
+    <div class="section-label">Анимация</div>
+
+    <div class="rcard">
+      <div class="rcard-header">
+        <div class="rcard-ico"><i class="ti ti-wand"></i></div>
+        <div>
+          <div class="rcard-label">Lead Animator</div>
+          <div class="rcard-name">Гл. аниматор</div>
+        </div>
+      </div>
+      <div class="rcard-body">
+        <div class="rcard-bullet">Делает графику наравне с Animator (50/50)</div>
+        <div class="rcard-bullet">Разрабатывает визуальный стиль каждого шоу</div>
+        <div class="rcard-bullet">Основной исполнитель по Pognali</div>
+        <div class="rcard-bullet">Создаёт шаблоны и motion-гайдлайн</div>
+        <div class="rcard-bullet">Проверяет работу Animator до сдачи Head</div>
+      </div>
+      <div class="rcard-footer">
+        <span class="badge"><i class="ti ti-home" style="font-size:9px;margin-right:3px"></i>Удалённо</span>
+        <span class="badge"><i class="ti ti-device-desktop" style="font-size:9px;margin-right:3px"></i>Своё железо</span>
+        <span class="badge" style="margin-left:auto;background:rgba(216,90,48,.12);color:#D85A30;border-color:rgba(216,90,48,.3)">150 000 – 200 000 ₽/мес</span>
+      </div>
+    </div>
+
+    <div class="arrow-row">
+      <svg width="16" height="28" viewBox="0 0 16 28">
+        <path d="M8 0v22M3 17l5 7 5-7" stroke="#4a5060" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="rcard">
+      <div class="rcard-header">
+        <div class="rcard-ico"><i class="ti ti-vector-triangle"></i></div>
+        <div>
+          <div class="rcard-label">Animator</div>
+          <div class="rcard-name">Аниматор</div>
+        </div>
+      </div>
+      <div class="rcard-body">
+        <div class="rcard-bullet">Делает графику наравне с Lead (50/50)</div>
+        <div class="rcard-bullet">Инфографика, заставки, титры, переходы</div>
+        <div class="rcard-bullet">Легальный текст и дисклеймеры</div>
+        <div class="rcard-bullet">Дорабатывает графику по фидбеку</div>
+      </div>
+      <div class="rcard-footer">
+        <span class="badge"><i class="ti ti-cpu" style="font-size:9px;margin-right:3px"></i>PC компании</span>
+        <span class="badge"><i class="ti ti-building" style="font-size:9px;margin-right:3px"></i>Офис</span>
+        <span class="badge" style="margin-left:auto;background:rgba(216,90,48,.12);color:#D85A30;border-color:rgba(216,90,48,.3)">120 000 – 150 000 ₽/мес</span>
+      </div>
+    </div>
+  </div>
+
+</div></div>
+<div class="sec-scroll" id="sec4"><div class="top">
+  <h1>POST PRODUCTION SETUP</h1>
+  
+</div>
+
+<!-- МОНТАЖ -->
+<div class="section-title">Монтаж</div>
+<div class="grid grid-2">
+
+  <div class="card c-teal">
+    <div class="card-header">
+      <div class="card-role">Lead Editor</div>
+      <div class="card-name">Гл. монтажёр</div>
+    </div>
+    <div class="card-body">
+      <div class="item">
+        <div class="ico ico-teal"><i class="ti ti-device-laptop"></i></div>
+        <div class="item-text">
+          <div class="item-label">Свой ноутбук</div>
+          <div class="item-sub">Premiere Pro · After Effects</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ico ico-teal"><i class="ti ti-device-desktop"></i></div>
+        <div class="item-text">
+          <div class="item-label">LG 27QN880-B — 1440p IPS</div>
+          <div class="item-sub">USB-C · Ergo Stand · один кабель · ~25 000 ₽</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ico ico-gray"><i class="ti ti-server"></i></div>
+        <div class="item-text">
+          <div class="item-label">Общее хранилище</div>
+          <div class="item-sub">Nextcloud / NAS — доступ по сети</div>
+        </div>
+      </div>
+      <span class="tag tag-teal">Офис · свой ноутбук</span>
+      <span class="tag tag-teal" style="margin-left:6px">150 000 – 200 000 ₽/мес</span>
+    </div>
+  </div>
+
+  <div class="card c-teal">
+    <div class="card-header">
+      <div class="card-role">Editor</div>
+      <div class="card-name">Монтажёр</div>
+    </div>
+    <div class="card-body">
+      <div class="item">
+        <div class="ico ico-teal"><i class="ti ti-device-laptop"></i></div>
+        <div class="item-text">
+          <div class="item-label">Свой ноутбук</div>
+          <div class="item-sub">Premiere Pro · After Effects</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ico ico-teal"><i class="ti ti-device-desktop"></i></div>
+        <div class="item-text">
+          <div class="item-label">LG 27QN880-B — 1440p IPS</div>
+          <div class="item-sub">USB-C · Ergo Stand · один кабель · ~25 000 ₽</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ico ico-gray"><i class="ti ti-server"></i></div>
+        <div class="item-text">
+          <div class="item-label">Общее хранилище</div>
+          <div class="item-sub">Nextcloud / NAS — доступ по сети</div>
+        </div>
+      </div>
+      <span class="tag tag-teal">Офис · свой ноутбук</span>
+      <span class="tag tag-teal" style="margin-left:6px">120 000 – 150 000 ₽/мес</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- АНИМАЦИЯ -->
+<div class="section-title">Анимация</div>
+<div class="grid grid-2">
+
+  <div class="card c-coral">
+    <div class="card-header">
+      <div class="card-role">Lead Animator</div>
+      <div class="card-name">Гл. аниматор</div>
+    </div>
+    <div class="card-body">
+      <div class="item">
+        <div class="ico ico-coral"><i class="ti ti-home"></i></div>
+        <div class="item-text">
+          <div class="item-label">Удалённо</div>
+          <div class="item-sub">Своё оборудование</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ico ico-coral"><i class="ti ti-vector-triangle"></i></div>
+        <div class="item-text">
+          <div class="item-label">Adobe Creative Cloud</div>
+          <div class="item-sub">Анимация · графика · Pognali основной объём</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ico ico-gray"><i class="ti ti-cloud"></i></div>
+        <div class="item-text">
+          <div class="item-label">Общее хранилище</div>
+          <div class="item-sub">Nextcloud — удалённый доступ</div>
+        </div>
+      </div>
+      <span class="tag tag-coral">Удалённо · своё железо</span>
+      <span class="tag tag-coral" style="margin-left:6px">150 000 – 200 000 ₽/мес</span>
+    </div>
+  </div>
+
+  <div class="card c-coral">
+    <div class="card-header">
+      <div class="card-role">Animator</div>
+      <div class="card-name">Аниматор</div>
+    </div>
+    <div class="card-body">
+      <div class="item">
+        <div class="ico ico-coral"><i class="ti ti-cpu"></i></div>
+        <div class="item-text">
+          <div class="item-label">PC #1 — ~140 000 ₽</div>
+          <div class="item-sub">Ryzen 9 9900X OEM 38 499₽ · RTX 4070 Ti Super 16GB ~60 000₽ · 64 GB DDR5 ~18 000₽ · 2 TB NVMe ~11 000₽ · Мат. плата B650 ~13 000₽ · БП + корпус ~10 000₽</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ico ico-coral"><i class="ti ti-device-desktop"></i></div>
+        <div class="item-text">
+          <div class="item-label">LG 27UK850-W — 4K IPS</div>
+          <div class="item-sub">3840×2160 · HDR · USB-C · DP · ~33 000 ₽</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ico ico-gray"><i class="ti ti-server"></i></div>
+        <div class="item-text">
+          <div class="item-label">Общее хранилище</div>
+          <div class="item-sub">Nextcloud / NAS — доступ по сети</div>
+        </div>
+      </div>
+      <span class="tag tag-coral">Офис · PC компании</span>
+      <span class="tag tag-coral" style="margin-left:6px">120 000 – 150 000 ₽/мес</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ПРОСМОТР / АРХИВ -->
+<div class="section-title">Просмотр · Архив · ЦК</div>
+<div class="grid grid-1">
+
+  <div class="card c-purple">
+    <div class="card-header">
+      <div class="card-role">Review & Archive Station</div>
+      <div class="card-name">Станция просмотра и архивации</div>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div class="item" style="margin:0">
+          <div class="ico ico-purple"><i class="ti ti-cpu"></i></div>
+          <div class="item-text">
+            <div class="item-label">PC #2 — ~$1,500</div>
+            <div class="item-sub">Ryzen 9 9900X · RTX 4070 Ti 16GB · 64 GB DDR5 · 2 TB NVMe</div>
+          </div>
+        </div>
+        <div class="item" style="margin:0">
+          <div class="ico ico-purple"><i class="ti ti-device-desktop"></i></div>
+          <div class="item-text">
+            <div class="item-label">LG 27UK850 — 4K IPS</div>
+            <div class="item-sub">Просмотр в нативном 4K · HDR · финальный контроль</div>
+          </div>
+        </div>
+        <div class="item" style="margin:0">
+          <div class="ico ico-gray"><i class="ti ti-database"></i></div>
+          <div class="item-text">
+            <div class="item-label">Архивация</div>
+            <div class="item-sub">Хранение · бэкап · выдача материала команде</div>
+          </div>
+        </div>
+        <div class="item" style="margin:0">
+          <div class="ico ico-purple"><i class="ti ti-color-swatch"></i></div>
+          <div class="item-text">
+            <div class="item-label">DaVinci Resolve Studio</div>
+            <div class="item-sub">Цветокоррекция и финальный грейдинг</div>
+          </div>
+        </div>
+      </div>
+      <span class="tag tag-purple">Офис · PC компании · общая станция</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+
+<!-- СОФТ -->
+<div class="section-title">Программное обеспечение</div>
+<div class="card" style="border-color:rgba(0,212,170,.2)">
+  <div class="card-header" style="background:rgba(0,212,170,.06);border-bottom-color:rgba(0,212,170,.15)">
+    <div class="card-role" style="color:var(--accent)">Software Stack</div>
+    <div class="card-name">Весь необходимый софт</div>
+  </div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+
+      <!-- Adobe -->
+      <div>
+        <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:8px">Adobe Creative Cloud</div>
+        <div class="item">
+          <div class="ico" style="background:rgba(0,212,170,.1);color:var(--accent)"><i class="ti ti-brand-adobe"></i></div>
+          <div class="item-text"><div class="item-label">Premiere Pro</div><div class="item-sub">Монтаж · все проекты</div></div>
+        </div>
+        <div class="item">
+          <div class="ico" style="background:rgba(0,212,170,.1);color:var(--accent)"><i class="ti ti-brand-adobe"></i></div>
+          <div class="item-text"><div class="item-label">After Effects</div><div class="item-sub">Анимация · motion graphics</div></div>
+        </div>
+        <div class="item">
+          <div class="ico" style="background:rgba(0,212,170,.1);color:var(--accent)"><i class="ti ti-brand-adobe"></i></div>
+          <div class="item-text"><div class="item-label">Photoshop · Illustrator</div><div class="item-sub">Графика · иллюстрации</div></div>
+        </div>
+        <div class="item">
+          <div class="ico" style="background:rgba(0,212,170,.1);color:var(--accent)"><i class="ti ti-brand-adobe"></i></div>
+          <div class="item-text"><div class="item-label">Audition</div><div class="item-sub">Звуковая постобработка</div></div>
+        </div>
+        <div class="item">
+          <div class="ico" style="background:rgba(0,212,170,.1);color:var(--accent)"><i class="ti ti-brand-adobe"></i></div>
+          <div class="item-text"><div class="item-label">Media Encoder</div><div class="item-sub">Экспорт и конвертация</div></div>
+        </div>
+        <span class="tag" style="background:rgba(0,212,170,.1);color:var(--accent);margin-top:6px;display:inline-block">4 лицензии All Apps</span>
+      </div>
+
+      <!-- Blackmagic + Red Giant -->
+      <div>
+        <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#7F77DD;margin-bottom:8px">Blackmagic Design</div>
+        <div class="item">
+          <div class="ico" style="background:rgba(127,119,221,.12);color:#7F77DD"><i class="ti ti-color-swatch"></i></div>
+          <div class="item-text"><div class="item-label">DaVinci Resolve Studio</div><div class="item-sub">Цветокоррекция · грейдинг · Fairlight</div></div>
+        </div>
+        <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#D85A30;margin-top:14px;margin-bottom:8px">Red Giant / Maxon</div>
+        <div class="item">
+          <div class="ico" style="background:rgba(216,90,48,.12);color:#D85A30"><i class="ti ti-sparkles"></i></div>
+          <div class="item-text"><div class="item-label">Red Giant Universe</div><div class="item-sub">Переходы · эффекты · текстуры</div></div>
+        </div>
+        <div class="item">
+          <div class="ico" style="background:rgba(216,90,48,.12);color:#D85A30"><i class="ti ti-color-filter"></i></div>
+          <div class="item-text"><div class="item-label">Magic Bullet Suite</div><div class="item-sub">Looks · Colorista · Denoiser · Mojo II</div></div>
+        </div>
+        <span class="tag" style="background:rgba(127,119,221,.12);color:#7F77DD;margin-top:6px;display:inline-block">Studio ~$295 · 2 лиц.</span>
+        <span class="tag" style="background:rgba(216,90,48,.12);color:#D85A30;margin-top:6px;margin-left:6px;display:inline-block">Maxon One подписка</span>
+      </div>
+
+      <!-- Boris FX -->
+      <div>
+        <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#378ADD;margin-bottom:8px">Boris FX</div>
+        <div class="item">
+          <div class="ico" style="background:rgba(55,138,221,.12);color:#378ADD"><i class="ti ti-wand"></i></div>
+          <div class="item-text"><div class="item-label">Sapphire</div><div class="item-sub">Премиум эффекты и переходы для AE и Premiere</div></div>
+        </div>
+        <div class="item">
+          <div class="ico" style="background:rgba(55,138,221,.12);color:#378ADD"><i class="ti ti-3d-cube-sphere"></i></div>
+          <div class="item-text"><div class="item-label">Mocha Pro</div><div class="item-sub">Трекинг · ротоскопинг · стабилизация</div></div>
+        </div>
+        <div class="item">
+          <div class="ico" style="background:rgba(55,138,221,.12);color:#378ADD"><i class="ti ti-typography"></i></div>
+          <div class="item-text"><div class="item-label">Continuum</div><div class="item-sub">Более 300 эффектов · VFX · титры</div></div>
+        </div>
+        <span class="tag" style="background:rgba(55,138,221,.12);color:#378ADD;margin-top:6px;display:inline-block">Boris FX Suite подписка</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- БЮДЖЕТ -->
+<div class="section-title">Бюджет на оборудование</div>
+<div class="budget-wrap">
+  <div class="budget-grid">
+    <div class="budget-item">
+      <div class="budget-item-label">PC #1<br>Аниматор</div>
+      <div class="budget-item-val">~140 000 ₽</div>
+    </div>
+    <div class="budget-item">
+      <div class="budget-item-label">PC #2<br>Просмотр / архив</div>
+      <div class="budget-item-val">~140 000 ₽</div>
+    </div>
+    <div class="budget-item">
+      <div class="budget-item-label">LG 27UK850-W × 2<br>4K мониторы</div>
+      <div class="budget-item-val">~66 000 ₽</div>
+    </div>
+    <div class="budget-item">
+      <div class="budget-item-label">LG 27QN880-B × 2<br>1440p мониторы</div>
+      <div class="budget-item-val">~50 000 ₽</div>
+    </div>
+  </div>
+  <div class="budget-total-row">
+    <div class="budget-total-label">Итого оборудование</div>
+    <div class="budget-total-val">~396 000 ₽</div>
+  </div>
+  <div class="budget-note">
+    Не включено: хранилище NAS ~80 000–120 000 ₽ · Adobe CC лицензии (4 места) · периферия — наушники, клавиатуры, мыши · Цены по данным dns-shop.ru
+  </div>
+  <div class="budget-note" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+    ФОТ (4 специалиста): 540 000 – 700 000 ₽/мес · Lead Editor 150–200 000 · Editor 120–150 000 · Lead Animator 150–200 000 · Animator 120–150 000
+  </div>
+</div></div>
+<div class="sec-scroll" id="sec5"><div class="top">
+  <h1>БЮДЖЕТ: ПОДРЯДЧИК VS СВОЯ КОМАНДА</h1>
+  
+</div>
+
+<!-- EPISODES -->
+<div class="section-title">Объём производства 2026</div>
+<div class="eps-grid">
+  <div class="ep-card" style="border-color:rgba(55,138,221,.3)">
+    <div class="ep-show" style="color:#378ADD">Faraway Rada</div>
+    <div class="ep-count">10</div>
+    <div class="ep-label">эпизодов</div>
+    <div class="ep-price" style="color:#378ADD">420 000 ₽/эп.</div>
+  </div>
+  <div class="ep-card" style="border-color:rgba(133,183,235,.3)">
+    <div class="ep-show" style="color:#85B7EB">Faraway Ivleeva</div>
+    <div class="ep-count">2</div>
+    <div class="ep-label">эпизода</div>
+    <div class="ep-price" style="color:#85B7EB">420 000 ₽/эп.</div>
+  </div>
+  <div class="ep-card" style="border-color:rgba(29,158,117,.3)">
+    <div class="ep-show" style="color:#1D9E75">Pognali.doc</div>
+    <div class="ep-count">14</div>
+    <div class="ep-label">эпизодов</div>
+    <div class="ep-price" style="color:#1D9E75">420 000 ₽/эп.</div>
+  </div>
+  <div class="ep-card" style="border-color:rgba(127,119,221,.3)">
+    <div class="ep-show" style="color:#7F77DD">Pognali unrel.</div>
+    <div class="ep-count">11</div>
+    <div class="ep-label">эпизодов</div>
+    <div class="ep-price" style="color:#7F77DD">260 000 ₽/эп.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- YEAR TOGGLE -->
+<div class="year-toggle">
+  <button class="ytab active" onclick="window._setYear5(1,this)">Год 1</button>
+  <button class="ytab" onclick="window._setYear5(2,this)">Год 2+</button>
+</div>
+
+<!-- COMPARISON -->
+<div class="compare-grid">
+
+  <!-- ПОДРЯДЧИК -->
+  <div class="col-card" style="border-color:rgba(216,90,48,.3)">
+    <div class="col-header" style="background:rgba(216,90,48,.08);border-bottom-color:rgba(216,90,48,.2)">
+      <div class="col-label" style="color:#D85A30">Вариант А</div>
+      <div class="col-title">Сторонний подрядчик</div>
+    </div>
+    <div class="col-body">
+      <div class="line-item">
+        <div><div class="li-label">Faraway Rada × 10</div></div>
+        <div class="li-val">4 200 000 ₽</div>
+      </div>
+      <div class="line-item">
+        <div><div class="li-label">Faraway Ivleeva × 2</div></div>
+        <div class="li-val">840 000 ₽</div>
+      </div>
+      <div class="line-item">
+        <div><div class="li-label">Pognali.doc × 14</div></div>
+        <div class="li-val">5 880 000 ₽</div>
+      </div>
+      <div class="line-item">
+        <div><div class="li-label">Pognali unrel. × 11</div></div>
+        <div class="li-val">2 860 000 ₽</div>
+      </div>
+      <div class="line-item" style="border:none;padding-top:12px">
+        <div><div class="li-label" style="opacity:.5">Оборудование</div></div>
+        <div class="li-val muted">—</div>
+      </div>
+      <div class="line-item" style="border:none;padding-top:4px">
+        <div><div class="li-label" style="opacity:.5">Лицензии на софт</div></div>
+        <div class="li-val muted">—</div>
+      </div>
+    </div>
+    <div class="total-row">
+      <div class="total-label">Итого в год</div>
+      <div class="total-val" style="color:#D85A30">13 780 000 ₽</div>
+    </div>
+  </div>
+
+  <!-- СВОЯ КОМАНДА -->
+  <div class="col-card" style="border-color:rgba(29,158,117,.3)">
+    <div class="col-header" style="background:rgba(29,158,117,.08);border-bottom-color:rgba(29,158,117,.2)">
+      <div class="col-label" style="color:#1D9E75">Вариант Б</div>
+      <div class="col-title">Своя команда</div>
+    </div>
+    <div class="col-body">
+      <div class="line-item">
+        <div>
+          <div class="li-label">Lead Editor · от 150 000 ₽/мес</div>
+          <div class="li-sub">× 12 месяцев</div>
+        </div>
+        <div class="li-val">1 800 000 ₽</div>
+      </div>
+      <div class="line-item">
+        <div>
+          <div class="li-label">Editor · 135 000 ₽/мес</div>
+          <div class="li-sub">× 12 месяцев</div>
+        </div>
+        <div class="li-val">1 620 000 ₽</div>
+      </div>
+      <div class="line-item">
+        <div>
+          <div class="li-label">Lead Animator · от 150 000 ₽/мес</div>
+          <div class="li-sub">× 12 месяцев</div>
+        </div>
+        <div class="li-val">1 800 000 ₽</div>
+      </div>
+      <div class="line-item">
+        <div>
+          <div class="li-label">Animator · 135 000 ₽/мес</div>
+          <div class="li-sub">× 12 месяцев</div>
+        </div>
+        <div class="li-val">1 620 000 ₽</div>
+      </div>
+      <div class="line-item">
+        <div>
+          <div class="li-label">Налоги на ФОТ (~30%)</div>
+        </div>
+        <div class="li-val">1 932 000 ₽</div>
+      </div>
+      <div class="line-item" id="equip-row">
+        <div>
+          <div class="li-label">Оборудование</div>
+          <div class="li-sub">2 PC + 4 монитора</div>
+        </div>
+        <div class="li-val" id="equip-val">396 000 ₽</div>
+      </div>
+      <div class="line-item">
+        <div>
+          <div class="li-label">Лицензии на софт</div>
+          <div class="li-sub">Adobe CC × 4 · DaVinci × 2 · Red Giant · Boris FX</div>
+        </div>
+        <div class="li-val" id="soft-val">529 000 ₽</div>
+      </div>
+    </div>
+    <div class="total-row">
+      <div class="total-label">Итого в год</div>
+      <div class="total-val" style="color:#1D9E75" id="own-total">10 697 000 ₽</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SAVINGS -->
+<div class="savings">
+  <div class="saving-card y1" id="save-card">
+    <div class="saving-ico y1"><i class="ti ti-piggy-bank"></i></div>
+    <div>
+      <div class="saving-label y1">Экономия в год 1</div>
+      <div class="saving-amount y1" id="save-amount">3 083 000 ₽</div>
+      <div class="saving-sub" id="save-pct">~22% от стоимости подрядчика</div>
+    </div>
+  </div>
+  <div class="saving-card y2">
+    <div class="saving-ico y2"><i class="ti ti-trending-up"></i></div>
+    <div>
+      <div class="saving-label y2">Начиная со 2-го года</div>
+      <div class="saving-amount y2">3 433 000 ₽/год</div>
+      <div class="saving-sub">~25% · оборудование уже куплено</div>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>Допущения:</strong> ФОТ взят по нижней границе вилок (Lead — 150 000 ₽, остальные — 135 000 ₽). Налоги на ФОТ — 30% (страховые взносы). DaVinci Resolve Studio — разовая покупка (~27 000 ₽ × 2), со 2-го года не учитывается. Adobe CC — через посредников ~84 000 ₽/год/лицензия. Red Giant / Maxon One — ~90 000 ₽/год. Boris FX Sapphire — ~49 000 ₽/год.
+</div></div>
 <script>
-// ── Tab switching ──────────────────────────────────────────────────────────
-const tabPanels=document.querySelectorAll('.tab-panel');
-const tabBtns=document.querySelectorAll('.tab-btn');
-function switchTab(n){
-  tabPanels.forEach((p,i)=>p.classList.toggle('active',i===n));
-  tabBtns.forEach((b,i)=>b.classList.toggle('active',i===n));
-  if(n===0&&window._tab1) window._tab1.render();
-  if(n===1&&window._tab2) window._tab2.render();
-}
 function toggleGlobalTheme(){
   const isLight=document.documentElement.classList.toggle('light');
   document.getElementById('globalTheme').textContent=isLight?'☾ Тёмная':'☀ Светлая';
 }
-function setH2(v){ if(window._tab2_setH) window._tab2_setH(v); }
-function setZoom1(v){
-  v=parseInt(v);
-  document.getElementById('tab1_zoomVal').textContent=v+'px';
-  const inner=document.getElementById('ganttInner');
-  if(inner){inner.style.minWidth=v+'px';inner.style.width=v+'px';}
-}
-function setZoom2(v){
-  v=parseInt(v);
-  document.getElementById('tab2_zoomVal').textContent=v+'px';
-  const gr=document.getElementById('tab2_gR');
-  if(gr){gr.style.minWidth=v+'px';gr.style.width=v+'px';}
-}
+const _navLinks=document.querySelectorAll('.nav-link');
+const _secs=document.querySelectorAll('[id^="sec"]');
+const _io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){_navLinks.forEach(l=>l.classList.remove('active'));const l=document.querySelector(`.nav-link[href="#${e.target.id}"]`);if(l)l.classList.add('active');}});
+},{threshold:0.2});
+_secs.forEach(s=>_io.observe(s));
 
-// ── Tab 1 ──────────────────────────────────────────────────────────────────
+function _setH2(v){if(window._setH2_fn)window._setH2_fn(v);}
+window._setZoom1=function(v){v=parseInt(v);const el=document.getElementById('tab1_zoomVal');if(el)el.textContent=v+'px';const i=document.getElementById('ganttInner');if(i){i.style.minWidth=v+'px';i.style.width=v+'px';}};
+window._setZoom2=function(v){v=parseInt(v);const el=document.getElementById('t2_zoomVal');if(el)el.textContent=v+'px';const g=document.getElementById('t2_gR');if(g){g.style.minWidth=v+'px';g.style.width=v+'px';}};
+
 (function(){
+let rowH1=34;
+const openState1=new Set();
 
 const SHOWS = {
   'Pognali':             { color: '#3b82f6', label: 'Pognali' },
@@ -766,7 +1645,7 @@ Object.entries(SHOWS).forEach(([key, {color, label}]) => {
   cb.addEventListener('change', () => {
     if (cb.checked) hiddenShows.delete(key);
     else hiddenShows.add(key);
-    render1_inner();
+    _r1();
   });
 
   const dot = document.createElement('div');
@@ -795,7 +1674,10 @@ function loadColor(n, max) {
   }
 }
 
-function render1_inner() {
+function _r1() {
+  // Apply row height
+  const sec1el=document.getElementById('sec1');
+  if(sec1el) sec1el.style.setProperty('--row-h', rowH1+'px');
   const filterMonth = document.getElementById('monthFilter').value;
   const inner = document.getElementById('ganttInner');
   inner.innerHTML = '';
@@ -943,76 +1825,116 @@ function render1_inner() {
     groups[row[0]].push(row);
   });
 
+  function makeGrid(area) {
+    const grid = document.createElement('div');
+    grid.className = 'grid-lines';
+    const cols = filterMonth === 'all' ? 12 : 4;
+    for (let i = 0; i < cols; i++) {
+      const gl = document.createElement('div'); gl.className = 'grid-line'; grid.appendChild(gl);
+    }
+    area.appendChild(grid);
+    if (todayPct >= 0 && todayPct <= 100) {
+      const tl = document.createElement('div');
+      tl.className = 'today-line';
+      tl.style.left = todayPct + '%';
+      area.appendChild(tl);
+    }
+  }
+
+  function makeBar(area, row, show) {
+    const sPct = toPctStr(row[2]);
+    const ePct = toPctStr(row[3]);
+    const wPct = Math.max(0.4, ePct - sPct);
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.left = sPct + '%';
+    bar.style.width = wPct + '%';
+    bar.style.background = SHOWS[show]?.color || '#888';
+    bar.addEventListener('mouseenter', e => showTooltip(e, row));
+    bar.addEventListener('mousemove', moveTooltip);
+    bar.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+    area.appendChild(bar);
+  }
+
   Object.entries(groups).forEach(([show, rows]) => {
     if (hiddenShows.has(show)) return;
+    const color = SHOWS[show]?.color || '#888';
+    const label = SHOWS[show]?.label || show;
+    const visibleRows = rows.filter(row => new Date(row[3]) >= rangeStart && new Date(row[2]) <= rangeEnd);
+    if (!visibleRows.length) return;
 
-    const gh = document.createElement('div');
-    gh.className = 'group-header';
-    gh.style.color = SHOWS[show]?.color || '#888';
-    gh.textContent = SHOWS[show]?.label || show;
-    inner.appendChild(gh);
+    // ── SUMMARY ROW (always visible) ──
+    const tr = document.createElement('div');
+    tr.className = 'gantt-row';
 
-    rows.forEach(row => {
-      const start = new Date(row[2]);
-      const end   = new Date(row[3]);
-      if (end < rangeStart || start > rangeEnd) return;
+    const lbl = document.createElement('div');
+    lbl.className = 'row-label';
 
-      const tr = document.createElement('div');
-      tr.className = 'gantt-row';
+    // Toggle button
+    const btn = document.createElement('button');
+    btn.className = 'toggle-btn';
+    btn.textContent = '▼';
+    btn.title = 'Развернуть эпизоды';
+    btn.style.cssText = `flex-shrink:0;cursor:pointer;background:none;border:1px solid ${color};border-radius:3px;font-size:8px;padding:1px 4px;color:${color};font-family:inherit;opacity:.55;line-height:1.3;margin-left:auto;`;
 
-      const lbl = document.createElement('div');
-      lbl.className = 'row-label';
-      lbl.innerHTML = `<span class="row-show" style="color:${SHOWS[show]?.color||'#888'}">${show}</span><span class="row-episode">${row[1]}</span>`;
-      tr.appendChild(lbl);
+    lbl.innerHTML = `<span class="row-show" style="color:${color};font-size:10px;font-weight:600">${label}</span>`;
+    lbl.appendChild(btn);
+    tr.appendChild(lbl);
 
-      const area = document.createElement('div');
-      area.className = 'chart-area';
+    const area = document.createElement('div');
+    area.className = 'chart-area';
+    makeGrid(area);
+    // All episode bars in one row
+    visibleRows.forEach(row => makeBar(area, row, show));
+    tr.appendChild(area);
+    inner.appendChild(tr);
 
-      // grid
-      const grid = document.createElement('div');
-      grid.className = 'grid-lines';
-      const cols = filterMonth === 'all' ? 12 : 4;
-      for (let i = 0; i < cols; i++) {
-        const gl = document.createElement('div'); gl.className = 'grid-line'; grid.appendChild(gl);
-      }
-      area.appendChild(grid);
+    // ── EPISODE ROWS (collapsible) ──
+    const subRows = [];
+    visibleRows.forEach(row => {
+      const sr = document.createElement('div');
+      sr.className = 'gantt-row';
+      sr.style.display = 'none';
+      sr.style.background = 'rgba(255,255,255,.012)';
 
-      // today
-      if (todayPct >= 0 && todayPct <= 100) {
-        const tl = document.createElement('div');
-        tl.className = 'today-line';
-        tl.style.left = todayPct + '%';
-        area.appendChild(tl);
-      }
+      const slbl = document.createElement('div');
+      slbl.className = 'row-label';
+      slbl.innerHTML = `<span class="row-show" style="color:${color};opacity:.5;font-size:8px">${label}</span><span class="row-episode">${row[1]}</span>`;
+      sr.appendChild(slbl);
 
-      // bar
-      const sPct = toPctStr(row[2]);
-      const ePct = toPctStr(row[3]);
-      const wPct = Math.max(0.4, ePct - sPct);
+      const sarea = document.createElement('div');
+      sarea.className = 'chart-area';
+      makeGrid(sarea);
+      makeBar(sarea, row, show);
+      sr.appendChild(sarea);
 
-      const bar = document.createElement('div');
-      bar.className = 'bar';
-      bar.style.left = sPct + '%';
-      bar.style.width = wPct + '%';
-      bar.style.background = SHOWS[show]?.color || '#888';
-      bar.addEventListener('mouseenter', e => showTooltip(e, row));
-      bar.addEventListener('mousemove', moveTooltip);
-      bar.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
-      area.appendChild(bar);
-
-      tr.appendChild(area);
-      inner.appendChild(tr);
+      subRows.push(sr);
+      inner.appendChild(sr);
     });
+
+    // Wire toggle
+    // Restore open state
+    if(openState1.has(show)){
+      subRows.forEach(sr=>sr.style.display='flex');
+      btn.textContent='▲'; btn.title='Свернуть';
+    }
+    btn.onclick = () => {
+      const open = subRows.length > 0 && subRows[0].style.display !== 'none';
+      if(open) openState1.delete(show); else openState1.add(show);
+      subRows.forEach(sr => sr.style.display = open ? 'none' : 'flex');
+      btn.textContent = open ? '▼' : '▲';
+      btn.title = open ? 'Развернуть эпизоды' : 'Свернуть';
+    };
   });
 }
 
-render1_inner();
+_r1();
 
 
-function updateRowHeight(val) {
+function _urh(val) {
   val = parseInt(val);
   document.getElementById('rowHeightVal').textContent = val + 'px';
-  document.getElementById('tab1').style.setProperty('--row-h', val + 'px');
+  document.documentElement.style.setProperty('--row-h', val + 'px');
 
   const inner = document.getElementById('ganttInner');
   // label visibility modes based on height
@@ -1032,12 +1954,12 @@ function updateRowHeight(val) {
 
   // also scale bar height proportionally
   const barH = Math.max(4, Math.round(val * 0.52));
-  document.querySelectorAll('#tab1 .bar').forEach(b => {
+  document.querySelectorAll('.bar').forEach(b => {
     b.style.height = barH + 'px';
   });
 }
 
-function toggleTheme1() {
+function _tt1() {
   const root = document.documentElement;
   const btn = document.getElementById('themeBtn');
   if (root.classList.contains('light')) {
@@ -1049,22 +1971,16 @@ function toggleTheme1() {
   }
 }
 
-window._tab1 = { render: render1_inner };
-window.updateRowHeight = function(val) {
-  val = parseInt(val);
-  document.getElementById('rowHeightVal').textContent = val + 'px';
-  document.getElementById('tab1').style.setProperty('--row-h', val + 'px');
-  const inner = document.getElementById('ganttInner');
-  if (!inner) return;
-  if (val <= 16) { inner.classList.add('no-labels'); inner.classList.remove('compact-labels'); }
-  else if (val <= 26) { inner.classList.add('compact-labels'); inner.classList.remove('no-labels'); }
-  else { inner.classList.remove('no-labels','compact-labels'); }
-  const barH = Math.max(4, Math.round(val * 0.52));
-  document.querySelectorAll('#tab1 .bar').forEach(b => b.style.height = barH + 'px');
-};
+function _urh_real(val){
+  val=parseInt(val);
+  const rv=document.getElementById('rowHeightVal');if(rv)rv.textContent=val+'px';
+  rowH1=val;
+  _r1();
+}
+window._render1=_r1;
+window._updateRowHeight=_urh_real;
 })();
 
-// ── Tab 2 ──────────────────────────────────────────────────────────────────
 (function(){
 
 const MONTHS=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
@@ -1165,7 +2081,7 @@ function getRng(f){
 function toPct(d,rs,rm){return Math.max(0,Math.min(100,((new Date(d)-rs)/rm)*100))}
 
 // Tooltip
-const tt=document.getElementById('tab2_tt');
+const tt=document.getElementById('t2_tt');
 function showTip(e,t){
   const dur=Math.round((new Date(t.e)-new Date(t.s))/86400000);
   tt.innerHTML=`<div class="tt-show">${t.show}</div><div>${t.ep}</div>
@@ -1177,199 +2093,205 @@ function showTip(e,t){
 function moveTip(e){tt.style.left=Math.min(e.clientX+14,window.innerWidth-230)+'px';tt.style.top=(e.clientY-10)+'px';}
 
 // Sync vertical scroll between left and right panels
-let syncLock2=false;
-document.addEventListener('DOMContentLoaded',()=>{
-  const gL=document.getElementById('tab2_gL');
-  const gRW=document.getElementById('tab2_gRW');
-  gL.addEventListener('scroll',()=>{if(!syncLock2){syncLock2=true;gRW.scrollTop=gL.scrollTop;syncLock2=false;}});
-  gRW.addEventListener('scroll',()=>{if(!syncLock2){syncLock2=true;gL.scrollTop=gRW.scrollTop;syncLock2=false;}});
-});
+let _sl2=false;
+// scroll sync removed - single container
 
 let rowH=30;
 const openState=new Set(); // tracks which persons have breakdown open
 
-function render2_inner(){
-  const gL=document.getElementById('tab2_gL'); gL.innerHTML='';
-  const gR=document.getElementById('tab2_gR'); gR.innerHTML='';
-  const f=document.getElementById('tab2_mf').value;
-  const{s:rs,e:re}=getRng(f);
-  const rm=re-rs;
-  const tp=toPct(TODAY,rs,rm);
-  function p(d){return toPct(d,rs,rm)}
+function _r2(){
+  const container = document.getElementById('t2_container');
+  if(!container) return;
+  container.innerHTML = '';
 
+  const f = document.getElementById('t2_mf').value;
+  const {s:rs, e:re} = (() => {
+    if(f==='all') return {s:new Date('2026-01-01'), e:new Date('2026-12-31')};
+    const m=parseInt(f); return {s:new Date(2026,m-1,1), e:new Date(2026,m,0)};
+  })();
+  const rm = re - rs;
+  const tp = Math.max(0,Math.min(100,((new Date(TODAY)-rs)/rm)*100));
+  function p(d){ return Math.max(0,Math.min(100,((new Date(d)-rs)/rm)*100)); }
   function addGrid(el){
-    const g=document.createElement('div'); g.className='grid-lines';
+    const g=document.createElement('div'); g.className='r-row';
+    g.style.cssText='position:absolute;inset:0;display:flex;pointer-events:none;z-index:1;';
     const n=f==='all'?12:4;
-    for(let i=0;i<n;i++){const c=document.createElement('div');c.className='grid-line';g.appendChild(c);}
-    if(tp>=0&&tp<=100){const tl=document.createElement('div');tl.className='today-line';tl.style.left=tp+'%';g.appendChild(tl);}
+    for(let i=0;i<n;i++){const c=document.createElement('div');c.style.cssText='flex:1;border-right:1px solid var(--border)';g.appendChild(c);}
+    if(tp>=0&&tp<=100){const tl=document.createElement('div');tl.style.cssText=`position:absolute;top:0;bottom:0;left:${tp}%;width:2px;background:var(--accent);opacity:.5;z-index:3;`;g.appendChild(tl);}
     el.appendChild(g);
   }
 
-  function addRow(lContent, rBuilder, h, extraClass=''){
-    h=h||rowH;
-    const lEl=document.createElement('div');
-    lEl.className='l-row '+(extraClass);
-    lEl.style.height=h+'px';
-    lContent(lEl);
-    gL.appendChild(lEl);
-
-    const rEl=document.createElement('div');
-    rEl.className='r-row '+(extraClass);
-    rEl.style.height=h+'px';
-    addGrid(rEl);
-    rBuilder(rEl);
-    gR.appendChild(rEl);
-    return{lEl,rEl};
-  }
+  // rowH is the variable (let rowH=30 defined above)
+  const LW = 230;
 
   // Month header
-  const lmH=document.createElement('div'); lmH.className='l-months'; lmH.textContent='СОТРУДНИК / ЗАДАЧА';
-  gL.appendChild(lmH);
-  const rmH=document.createElement('div'); rmH.className='r-months';
+  const mhdr = document.createElement('div');
+  mhdr.style.cssText=`display:flex;height:30px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;background:var(--bg);`;
+  const mlbl=document.createElement('div');
+  mlbl.style.cssText=`width:${LW}px;min-width:${LW}px;flex-shrink:0;padding:0 12px;display:flex;align-items:center;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-right:1px solid var(--border);position:sticky;left:0;background:var(--bg);z-index:21;`;
+  mlbl.textContent='СОТРУДНИК / ЗАДАЧА';
+  mhdr.appendChild(mlbl);
+  const mcols=document.createElement('div');
+  mcols.style.cssText='flex:1;display:flex;';
   (f==='all'?MONTHS:['Нед 1','Нед 2','Нед 3','Нед 4']).forEach(m=>{
-    const c=document.createElement('div');c.className='month-cell';c.textContent=m;rmH.appendChild(c);
+    const mc=document.createElement('div');
+    mc.style.cssText='flex:1;text-align:center;line-height:30px;font-size:10px;color:var(--muted);text-transform:uppercase;border-right:1px solid var(--border);';
+    mc.textContent=m; mcols.appendChild(mc);
   });
-  gR.appendChild(rmH);
+  mhdr.appendChild(mcols);
+  container.appendChild(mhdr);
 
-  PEOPLE.forEach(person=>{
-    // Person header
-    const lph=document.createElement('div'); lph.className='l-person'; lph.style.color=person.color;
-    const dot=document.createElement('div'); dot.className='person-dot'; dot.style.background=person.color; lph.appendChild(dot);
-    lph.appendChild(document.createTextNode(person.name));
-    gL.appendChild(lph);
-    const rph=document.createElement('div'); rph.className='r-person'; gR.appendChild(rph);
+  function makeRow(labelHTML, labelColor, tasks, height, bg) {
+    const row = document.createElement('div');
+    row.style.cssText=`display:flex;height:${height||rowH}px;border-bottom:1px solid var(--border);${bg?'background:'+bg:''}`;
 
-    // Tasks in range
-    const tasks=person.tasks.filter(t=>new Date(t.e)>=rs&&new Date(t.s)<=re);
+    const lbl=document.createElement('div');
+    lbl.style.cssText=`width:${LW}px;min-width:${LW}px;flex-shrink:0;padding:3px 10px;border-right:1px solid var(--border);display:flex;align-items:center;position:sticky;left:0;z-index:5;background:${bg||'var(--surface)'};overflow:hidden;font-size:10px;`;
+    lbl.innerHTML=labelHTML;
+    row.appendChild(lbl);
 
-    // Main row
-    const lMain=document.createElement('div'); lMain.className='l-row'; lMain.style.height=rowH+'px';
-    const lcol=document.createElement('div'); lcol.className='l-col';
-    const lname=document.createElement('span'); lname.className='l-name'; lname.style.color=person.color; lname.textContent=person.label;
-    const lep=document.createElement('span'); lep.className='l-ep'; lep.textContent=person.label;
-    // toggle btn
-    const btn=document.createElement('button'); btn.className='toggle-btn'; btn.textContent='▼'; btn.title='По проектам';
-    btn.style.color=person.color;
-    lcol.appendChild(lname); lMain.appendChild(lcol); lMain.appendChild(btn);
-    gL.appendChild(lMain);
+    const chart=document.createElement('div');
+    chart.style.cssText=`flex:1;position:relative;height:${height||rowH}px;`;
+    // grid
+    const gd=document.createElement('div');
+    gd.style.cssText='position:absolute;inset:0;display:flex;pointer-events:none;';
+    const n=f==='all'?12:4;
+    for(let i=0;i<n;i++){const gl=document.createElement('div');gl.style.cssText='flex:1;border-right:1px solid var(--border);';gd.appendChild(gl);}
+    if(tp>=0&&tp<=100){const tl=document.createElement('div');tl.style.cssText=`position:absolute;top:0;bottom:0;left:${tp}%;width:2px;background:var(--accent);opacity:.5;z-index:3;pointer-events:none;`;gd.appendChild(tl);}
+    chart.appendChild(gd);
 
-    const rMain=document.createElement('div'); rMain.className='r-row'; rMain.style.height=rowH+'px';
-    addGrid(rMain);
-    tasks.forEach(t=>{
+    if(tasks) tasks.forEach(t=>{
       const sp=p(t.s),ep2=p(t.e),w=Math.max(0.3,ep2-sp);
-      const bar=document.createElement('div'); bar.className='bar';
-      const bh=Math.max(6,Math.round(rowH*.55));
-      bar.style.cssText=`left:${sp}%;width:${w}%;background:${col(t.show)};height:${bh}px`;
+      const bh=Math.max(6,Math.round((height||rowH)*.55));
+      const bar=document.createElement('div');
+      bar.style.cssText=`position:absolute;top:50%;transform:translateY(-50%);left:${sp}%;width:${w}%;height:${bh}px;border-radius:3px;background:${col(t.show)};opacity:.88;cursor:pointer;z-index:2;`;
       bar.addEventListener('mouseenter',e=>showTip(e,t));
       bar.addEventListener('mousemove',moveTip);
       bar.addEventListener('mouseleave',()=>tt.classList.remove('vis'));
-      rMain.appendChild(bar);
+      chart.appendChild(bar);
     });
-    gR.appendChild(rMain);
+    row.appendChild(chart);
+    return row;
+  }
 
-    // Sub rows per show
-    const shows=[...new Set(tasks.map(t=>t.show))].sort((a,b)=>{
-      const ai=SHOW_ORDER.indexOf(a),bi=SHOW_ORDER.indexOf(b);
-      return(ai<0?99:ai)-(bi<0?99:bi);
-    });
-    const subPairs=[];
+  PEOPLE.forEach(person=>{
+    // Person header
+    const ph=document.createElement('div');
+    ph.style.cssText=`display:flex;height:30px;background:var(--surface);border-bottom:2px solid var(--border);border-top:1px solid var(--border);`;
+    const phl=document.createElement('div');
+    phl.style.cssText=`width:${LW}px;min-width:${LW}px;flex-shrink:0;padding:0 12px;display:flex;align-items:center;gap:7px;font-family:"Unbounded",sans-serif;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:${person.color};border-right:1px solid var(--border);position:sticky;left:0;z-index:6;background:var(--surface);`;
+    const dot=document.createElement('div');dot.style.cssText=`width:7px;height:7px;border-radius:50%;background:${person.color};flex-shrink:0;`;
+    phl.appendChild(dot);phl.appendChild(document.createTextNode(person.name));
+    ph.appendChild(phl);
+    const phc=document.createElement('div');phc.style.cssText='flex:1;';ph.appendChild(phc);
+    container.appendChild(ph);
+
+    const tasks=person.tasks.filter(t=>new Date(t.e)>=rs&&new Date(t.s)<=re);
+
+    // Main row
+    const mainLbl=`<span style="font-size:9px;color:${person.color};text-transform:uppercase;letter-spacing:.08em">${person.label}</span>`;
+    const btn=document.createElement('button');
+    btn.style.cssText=`cursor:pointer;background:none;border:1px solid ${person.color};border-radius:3px;font-size:8px;padding:1px 4px;color:${person.color};font-family:inherit;opacity:.55;margin-left:auto;flex-shrink:0;line-height:1.3;`;
+    btn.textContent='▼';
+
+    const mainRow=makeRow(mainLbl, person.color, tasks);
+    mainRow.querySelector('div').appendChild(btn);
+    container.appendChild(mainRow);
+
+    // Sub rows by show
+    const SHOW_ORDER=['Pognali','Pognali unrel.','Pognali.doc','Faraway Rada','Faraway Ivleeva'];
+    const shows=[...new Set(tasks.map(t=>t.show))].sort((a,b)=>(SHOW_ORDER.indexOf(a)<0?99:SHOW_ORDER.indexOf(a))-(SHOW_ORDER.indexOf(b)<0?99:SHOW_ORDER.indexOf(b)));
+    const subRows=[];
     shows.forEach(show=>{
       const showTasks=tasks.filter(t=>t.show===show);
-
-      const lSub=document.createElement('div'); lSub.className='l-row sub-row'; lSub.style.cssText=`height:${rowH}px;display:none;background:rgba(255,255,255,.01)`;
-      const st=document.createElement('span'); st.className='l-sub-text';
-      st.innerHTML=`<span style="opacity:.4;font-size:9px">${person.label} | </span><span style="color:${col(show)}">${show}</span>`;
-      lSub.appendChild(st); gL.appendChild(lSub);
-
-      const rSub=document.createElement('div'); rSub.className='r-row sub-row'; rSub.style.cssText=`height:${rowH}px;display:none;background:rgba(255,255,255,.01)`;
-      addGrid(rSub);
-      const bh=Math.max(5,Math.round(rowH*.42));
-      showTasks.forEach(t=>{
-        const sp=p(t.s),ep2=p(t.e),w=Math.max(0.3,ep2-sp);
-        const bar=document.createElement('div'); bar.className='bar';
-        bar.style.cssText=`left:${sp}%;width:${w}%;background:${col(t.show)};height:${bh}px;opacity:.8`;
-        bar.addEventListener('mouseenter',e=>showTip(e,t));
-        bar.addEventListener('mousemove',moveTip);
-        bar.addEventListener('mouseleave',()=>tt.classList.remove('vis'));
-        rSub.appendChild(bar);
-      });
-      gR.appendChild(rSub);
-      subPairs.push({lSub,rSub});
+      const lbl=`<span style="font-size:9px;opacity:.4">${person.label} | </span><span style="color:${col(show)};font-size:10px">${show}</span>`;
+      const sr=makeRow(lbl, person.color, showTasks, rowH, 'rgba(255,255,255,.01)');
+      sr.style.display='none';
+      container.appendChild(sr);
+      subRows.push(sr);
     });
 
-    const stateKey=person.name;
-    if(openState.has(stateKey)){
-      subPairs.forEach(({lSub,rSub})=>{lSub.style.display='flex';rSub.style.display='flex';});
+    btn.onclick=()=>{
+      const open=subRows.length>0&&subRows[0].style.display!=='none';
+      if(open) openState.delete(person.name); else openState.add(person.name);
+      subRows.forEach(sr=>sr.style.display=open?'none':'flex');
+      btn.textContent=open?'▼':'▲';
+    };
+    if(openState.has(person.name)){
+      subRows.forEach(sr=>sr.style.display='flex');
       btn.textContent='▲';
     }
-    btn.onclick=()=>{
-      const open=subPairs.length>0&&subPairs[0].lSub.style.display!=='none';
-      if(open) openState.delete(stateKey); else openState.add(stateKey);
-      subPairs.forEach(({lSub,rSub})=>{lSub.style.display=open?'none':'flex';rSub.style.display=open?'none':'flex';});
-      btn.textContent=open?'▼':'▲';
-      requestAnimationFrame(syncHeights2);
-    };
 
     // Summary row
     const byShow={};let totalEp=0,totalDays=0;
     tasks.forEach(t=>{byShow[t.show]=(byShow[t.show]||0)+1;totalEp++;totalDays+=Math.round((new Date(t.e)-new Date(t.s))/86400000);});
-
-    const lSum=document.createElement('div'); lSum.className='l-row l-sum';
-    lSum.style.minHeight='26px';
-    const lSumTxt=document.createElement('span'); lSumTxt.style.cssText='font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em'; lSumTxt.textContent='Итого / окна';
-    lSum.appendChild(lSumTxt); gL.appendChild(lSum);
-
-    const rSum=document.createElement('div'); rSum.className='r-sum';
-    const stat=document.createElement('span'); stat.className='sum-stat';
-    stat.innerHTML=`<strong>${totalEp}</strong> эп. · <strong>${Math.round(totalDays/7)}</strong> нед.`;
-    rSum.appendChild(stat);
+    const sumRow=document.createElement('div');
+    sumRow.style.cssText=`display:flex;border-bottom:2px solid var(--border);min-height:26px;`;
+    const sumL=document.createElement('div');
+    sumL.style.cssText=`width:${LW}px;min-width:${LW}px;flex-shrink:0;padding:4px 10px;border-right:1px solid var(--border);display:flex;align-items:center;position:sticky;left:0;z-index:5;background:var(--bg);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;`;
+    sumL.textContent='Итого / окна';
+    sumRow.appendChild(sumL);
+    const sumR=document.createElement('div');
+    sumR.style.cssText='flex:1;display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:3px 8px;';
+    const stat=document.createElement('span');stat.style.cssText='font-size:9px;color:var(--muted);';
+    stat.innerHTML=`<strong style="color:var(--text)">${totalEp}</strong> эп. · <strong style="color:var(--text)">${Math.round(totalDays/7)}</strong> нед.`;
+    sumR.appendChild(stat);
     Object.entries(byShow).forEach(([show,cnt])=>{
-      const ch=document.createElement('span'); ch.className='chip';
-      const c=col(show); ch.style.borderColor=c; ch.style.color=c;
-      ch.textContent=`${show.replace(' unrel.','★').replace('Faraway ','')} ×${cnt}`; rSum.appendChild(ch);
+      const ch=document.createElement('span');
+      ch.style.cssText=`font-size:9px;padding:2px 6px;border-radius:9px;border:1px solid ${col(show)};color:${col(show)};opacity:.8;white-space:nowrap;`;
+      ch.textContent=`${show.replace(' unrel.','★').replace('Faraway ','')} ×${cnt}`;
+      sumR.appendChild(ch);
     });
-
-    gR.appendChild(rSum);
+    sumRow.appendChild(sumR);
+    container.appendChild(sumRow);
   });
-  // Sync row heights after DOM is painted
-  requestAnimationFrame(()=>requestAnimationFrame(syncHeights2));
 }
+requestAnimationFrame(()=>_r2());
+function _sh_inner(v){
+  rowH=parseInt(v);
+  const rv=document.getElementById('t2_rhv');if(rv)rv.textContent=v+'px';
+  _r2();
+}
+window._render2=_r2;
+window._setH2=_sh_inner;
+window._setH2_fn=_sh_inner;
+})();
 
-function syncHeights2(){
-  // Only sync sum rows (variable height due to chip wrapping)
-  const lSums=document.querySelectorAll('#gL .l-sum');
-  const rSums=document.querySelectorAll('#gR .r-sum');
-  const n=Math.min(lSums.length,rSums.length);
-  for(let i=0;i<n;i++){
-    lSums[i].style.height='';
-    rSums[i].style.height='';
-    const h=Math.max(lSums[i].scrollHeight, rSums[i].scrollHeight, 26);
-    lSums[i].style.height=h+'px';
-    rSums[i].style.height=h+'px';
+
+let currentYear = 1;
+
+function _sy5(y, btn) {
+  currentYear = y;
+  document.querySelectorAll('.ytab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const equipRow = document.getElementById('equip-row');
+  const equipVal = document.getElementById('equip-val');
+  const softVal = document.getElementById('soft-val');
+  const ownTotal = document.getElementById('own-total');
+  const saveAmount = document.getElementById('save-amount');
+  const savePct = document.getElementById('save-pct');
+  const saveCard = document.getElementById('save-card');
+
+  if (y === 1) {
+    equipVal.textContent = '396 000 ₽';
+    equipRow.style.opacity = '1';
+    softVal.textContent = '529 000 ₽';
+    ownTotal.textContent = '10 697 000 ₽';
+    saveAmount.textContent = '3 083 000 ₽';
+    savePct.textContent = '~22% от стоимости подрядчика';
+    saveCard.querySelector('.saving-label').textContent = 'Экономия в год 1';
+  } else {
+    equipVal.textContent = '—';
+    equipRow.style.opacity = '.4';
+    softVal.textContent = '475 000 ₽';
+    ownTotal.textContent = '10 247 000 ₽';
+    saveAmount.textContent = '3 533 000 ₽';
+    savePct.textContent = '~26% от стоимости подрядчика';
+    saveCard.querySelector('.saving-label').textContent = 'Экономия со 2-го года';
   }
 }
 
-function setH(v){
-  rowH=parseInt(v);
-  document.getElementById('tab2_rhv').textContent=v+'px';
-  render2_inner(); // openState preserves which rows are open
-}
-
-function toggleTheme2(){
-  const r=document.documentElement,b=document.getElementById('tab2_themeBtn');
-  r.classList.toggle('light'); b.textContent=r.classList.contains('light')?'☾ Тёмная':'☀ Светлая';
-}
-
-render2_inner();
-setTimeout(syncHeights2,50);
-
-window._tab2 = { render: render2_inner };
-window._tab2_setH = function(v) {
-  rowH = parseInt(v);
-  document.getElementById('tab2_rhv').textContent = v + 'px';
-  render2_inner();
-};
-})();
 </script>
 </body>
 </html>
