@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Загрузка команды 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Unbounded:wght@300;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--surface:#151820;--border:#1e2330;--text:#e8eaf0;--muted:#4a5060;--accent:#00d4aa;--lw:220px;--rh:30px;}
+:root.light{--bg:#f4f5f7;--surface:#ffffff;--border:#dde1ea;--text:#1a1d26;--muted:#8a93a8;--accent:#00a887;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px}
+
+header{padding:20px 24px 14px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+header h1{font-family:'Unbounded',sans-serif;font-weight:600;font-size:16px;color:var(--accent)}
+header span{color:var(--muted);font-size:11px}
+.theme-btn{margin-left:auto;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.legend{display:flex;flex-wrap:wrap;gap:5px 14px;padding:7px 24px;border-bottom:1px solid var(--border)}
+.li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.ldot{width:8px;height:8px;border-radius:2px}
+
+.controls{padding:7px 24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.controls label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em}
+select{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 7px;border-radius:4px;cursor:pointer}
+.hctl{display:flex;align-items:center;gap:7px}
+.hctl input{width:80px;accent-color:var(--accent);cursor:pointer}
+.hval{color:var(--accent);font-size:10px;min-width:28px}
+
+/* ── Two-panel layout ── */
+.gantt-wrap{display:flex;height:calc(100vh - 185px);overflow:hidden}
+
+/* Left panel: fixed labels, scrolls vertically in sync */
+.g-left{
+  width:var(--lw);min-width:var(--lw);flex-shrink:0;
+  overflow-y:scroll;overflow-x:hidden;
+  scrollbar-width:none;border-right:1px solid var(--border);
+  background:var(--surface);
+}
+.g-left::-webkit-scrollbar{display:none}
+
+/* Right panel: scrolls both axes */
+.g-right-wrap{flex:1;overflow:auto;}
+.g-right{min-width:900px;position:relative;}
+
+/* Row heights matched via JS */
+.l-row{
+  display:flex;align-items:center;
+  border-bottom:1px solid var(--border);
+  height:var(--rh);overflow:hidden;
+  padding:2px 10px 2px 12px;
+  background:var(--surface);
+  flex-shrink:0;
+}
+.r-row{
+  position:relative;border-bottom:1px solid var(--border);
+  height:var(--rh);overflow:hidden;flex-shrink:0;
+}
+.r-row .grid-lines{position:absolute;inset:0;display:flex;pointer-events:none}
+.r-row .grid-line{flex:1;border-right:1px solid var(--border)}
+.r-row .grid-line:last-child{border-right:none}
+.today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);opacity:.5;z-index:3;pointer-events:none}
+
+/* person header row */
+.l-person{
+  height:30px;display:flex;align-items:center;gap:7px;padding:0 10px 0 12px;
+  background:var(--surface);border-bottom:2px solid var(--border);border-top:1px solid var(--border);
+  font-family:'Unbounded',sans-serif;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  flex-shrink:0;
+}
+.r-person{height:30px;background:var(--surface);border-bottom:2px solid var(--border);border-top:1px solid var(--border);}
+
+/* month header */
+.r-months{
+  position:sticky;top:0;z-index:10;
+  display:flex;height:30px;background:var(--bg);
+  border-bottom:1px solid var(--border);
+}
+.l-months{
+  position:sticky;top:0;z-index:10;
+  height:30px;display:flex;align-items:center;
+  padding:0 12px;font-size:9px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;
+  background:var(--bg);border-bottom:1px solid var(--border);
+}
+.month-cell{flex:1;text-align:center;line-height:30px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-right:1px solid var(--border)}
+.month-cell:last-child{border-right:none}
+
+/* label text */
+.l-name{font-size:9px;opacity:.5;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l-ep{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l-sub-text{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l-col{display:flex;flex-direction:column;gap:1px;flex:1;overflow:hidden}
+
+/* bar */
+.bar{position:absolute;top:50%;transform:translateY(-50%);border-radius:3px;opacity:.88;cursor:pointer;z-index:2}
+.bar:hover{opacity:1}
+
+/* toggle */
+.toggle-btn{cursor:pointer;background:none;border:1px solid currentColor;border-radius:3px;font-size:8px;padding:1px 4px;color:inherit;font-family:inherit;opacity:.5;flex-shrink:0;line-height:1.3}
+.toggle-btn:hover{opacity:1}
+
+/* dot */
+.person-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* sum row */
+.l-sum{height:auto;min-height:26px;align-items:center;background:var(--bg);border-bottom:2px solid var(--border)}
+.r-sum{min-height:26px;background:var(--bg);border-bottom:2px solid var(--border);display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:3px 8px}
+.sum-stat{color:var(--muted);font-size:9px;white-space:nowrap}
+.sum-stat strong{color:var(--text);font-weight:600}
+.chip{padding:2px 6px;border-radius:9px;border:1px solid;font-size:9px;white-space:nowrap;opacity:.8}
+
+.badge{font-size:8px;padding:1px 5px;border-radius:8px;border:1px solid;margin-left:3px;letter-spacing:.03em}
+
+/* tooltip */
+.tooltip{display:none;position:fixed;background:var(--surface);border:1px solid var(--accent);color:var(--text);padding:8px 12px;border-radius:6px;font-size:11px;line-height:1.7;z-index:9999;pointer-events:none;max-width:210px;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.tooltip.vis{display:block}
+.tt-show{color:var(--accent);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+</style>
+</head>
+<body>
+<header>
+  <h1>ЗАГРУЗКА КОМАНДЫ 2026</h1>
+  <span>Post Production Department</span>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀ Светлая</button>
+</header>
+<div class="legend">
+  <div class="li"><div class="ldot" style="background:#E05C28"></div>Pognali</div>
+  <div class="li"><div class="ldot" style="background:#7F77DD"></div>Pognali unrel.</div>
+  <div class="li"><div class="ldot" style="background:#1D9E75"></div>Pognali.doc</div>
+  <div class="li"><div class="ldot" style="background:#378ADD"></div>Faraway Rada</div>
+  <div class="li"><div class="ldot" style="background:#85B7EB"></div>Faraway Ivleeva</div>
+</div>
+<div class="controls">
+  <label>Период:</label>
+  <select id="mf" onchange="render()">
+    <option value="all">Весь год</option>
+    <option value="1">Янв</option><option value="2">Фев</option>
+    <option value="3">Мар</option><option value="4">Апр</option>
+    <option value="5">Май</option><option value="6">Июн</option>
+    <option value="7">Июл</option><option value="8">Авг</option>
+    <option value="9">Сен</option><option value="10">Окт</option>
+    <option value="11">Ноя</option><option value="12">Дек</option>
+  </select>
+  <div class="hctl">
+    <label>Высота:</label>
+    <input type="range" id="rh" min="14" max="48" value="30" step="1" oninput="setH(this.value)">
+    <span class="hval" id="rhv">30px</span>
+  </div>
+</div>
+<div class="gantt-wrap">
+  <div class="g-left" id="gL"></div>
+  <div class="g-right-wrap" id="gRW">
+    <div class="g-right" id="gR"></div>
+  </div>
+</div>
+<div class="tooltip" id="tt"></div>
+
+<script>
+const MONTHS=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+const TODAY='2026-06-03';
+const SHOW_ORDER=['Pognali','Pognali unrel.','Pognali.doc','Faraway Rada','Faraway Ivleeva'];
+const COLORS={'Pognali':'#E05C28','Pognali unrel.':'#7F77DD','Pognali.doc':'#1D9E75','Faraway Rada':'#378ADD','Faraway Ivleeva':'#85B7EB'};
+function col(s){return COLORS[s]||'#888'}
+function fmt(d){return new Date(d).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}
+
+const PEOPLE=[
+  {name:'Гл. монтажёр',color:'#1D9E75',label:'Монтаж',tasks:[
+      {show:'Faraway Rada',ep:'Zanzibar 1',s:'2026-01-06',e:'2026-01-20'},
+      {show:'Faraway Rada',ep:'Zanzibar 2',s:'2026-01-21',e:'2026-02-04'},
+      {show:'Faraway Rada',ep:'Mauritius 1',s:'2026-02-11',e:'2026-02-25'},
+      {show:'Pognali.doc',ep:'Africa 1',s:'2026-03-02',e:'2026-03-16'},
+      {show:'Faraway Ivleeva',ep:'Ethiopia',s:'2026-03-17',e:'2026-03-31'},
+      {show:'Faraway Rada',ep:'Seychelles',s:'2026-03-31',e:'2026-04-14'},
+      {show:'Pognali unrel.',ep:'EDA',s:'2026-04-15',e:'2026-04-29'},
+      {show:'Pognali unrel.',ep:'Episode 4',s:'2026-05-07',e:'2026-05-21'},
+      {show:'Faraway Rada',ep:'Episode 8',s:'2026-05-24',e:'2026-06-07'},
+      {show:'Faraway Rada',ep:'Episode 9',s:'2026-06-18',e:'2026-07-02'},
+      {show:'Pognali.doc',ep:'China',s:'2026-07-02',e:'2026-07-16'},
+      {show:'Pognali unrel.',ep:'Episode 7',s:'2026-07-16',e:'2026-07-30'},
+      {show:'Pognali unrel.',ep:'Episode 8',s:'2026-08-03',e:'2026-08-17'},
+      {show:'Pognali.doc',ep:'Episode 7',s:'2026-08-17',e:'2026-08-31'},
+      {show:'Pognali.doc',ep:'Episode 8',s:'2026-09-01',e:'2026-09-15'},
+      {show:'Pognali unrel.',ep:'Episode 10',s:'2026-09-16',e:'2026-09-30'},
+      {show:'Pognali unrel.',ep:'Episode 11',s:'2026-10-08',e:'2026-10-22'},
+      {show:'Pognali unrel.',ep:'Episode 12',s:'2026-10-30',e:'2026-11-13'},
+      {show:'Pognali.doc',ep:'Episode 12',s:'2026-11-25',e:'2026-12-09'}
+  ]},
+  {name:'Монтажёр',color:'#5DCAA5',label:'Монтаж',tasks:[
+      {show:'Pognali.doc',ep:'Brazil 2',s:'2026-01-12',e:'2026-01-26'},
+      {show:'Pognali.doc',ep:'Mexico 2',s:'2026-01-26',e:'2026-02-09'},
+      {show:'Pognali.doc',ep:'Sicilian mafia',s:'2026-02-27',e:'2026-03-13'},
+      {show:'Faraway Rada',ep:'Mauritius 2',s:'2026-03-13',e:'2026-03-27'},
+      {show:'Pognali unrel.',ep:'INDIAN TRAIN',s:'2026-03-27',e:'2026-04-10'},
+      {show:'Faraway Ivleeva',ep:'Tanzania',s:'2026-04-10',e:'2026-04-24'},
+      {show:'Pognali.doc',ep:'India 1',s:'2026-04-24',e:'2026-05-08'},
+      {show:'Pognali.doc',ep:'India 2',s:'2026-05-14',e:'2026-05-28'},
+      {show:'Pognali unrel.',ep:'Episode 5',s:'2026-05-29',e:'2026-06-12'},
+      {show:'Pognali unrel.',ep:'Episode 6',s:'2026-06-20',e:'2026-07-04'},
+      {show:'Pognali.doc',ep:'Mongolia',s:'2026-07-10',e:'2026-07-24'},
+      {show:'Faraway Rada',ep:'Episode 10',s:'2026-07-24',e:'2026-08-07'},
+      {show:'Faraway Rada',ep:'Episode 11',s:'2026-08-15',e:'2026-08-29'},
+      {show:'Pognali unrel.',ep:'Episode 9',s:'2026-08-29',e:'2026-09-12'},
+      {show:'Faraway Rada',ep:'Episode 12',s:'2026-09-12',e:'2026-09-26'},
+      {show:'Pognali.doc',ep:'Africa 2',s:'2026-10-08',e:'2026-10-22'},
+      {show:'Pognali.doc',ep:'Episode 10',s:'2026-10-24',e:'2026-11-07'},
+      {show:'Pognali.doc',ep:'Episode 11',s:'2026-11-09',e:'2026-11-23'}
+  ]},
+  {name:'Гл. аниматор',color:'#7F77DD',label:'Анимация',tasks:[
+      {show:'Faraway Rada',ep:'Zanzibar 1',s:'2026-01-13',e:'2026-01-27'},
+      {show:'Faraway Rada',ep:'Zanzibar 2',s:'2026-01-28',e:'2026-02-11'},
+      {show:'Pognali',ep:'Europe 4',s:'2026-02-17',e:'2026-03-03'},
+      {show:'Pognali.doc',ep:'Sicilian mafia',s:'2026-03-06',e:'2026-03-20'},
+      {show:'Pognali',ep:'USA 8',s:'2026-03-20',e:'2026-04-03'},
+      {show:'Pognali unrel.',ep:'INDIAN TRAIN',s:'2026-04-03',e:'2026-04-17'},
+      {show:'Pognali',ep:'India 3',s:'2026-04-20',e:'2026-05-04'},
+      {show:'Pognali',ep:'DPRK 5',s:'2026-05-04',e:'2026-05-18'},
+      {show:'Faraway Rada',ep:'Episode 8',s:'2026-05-31',e:'2026-06-14'},
+      {show:'Faraway Rada',ep:'Episode 9',s:'2026-06-25',e:'2026-07-09'},
+      {show:'Pognali',ep:'Pakistan 1',s:'2026-07-09',e:'2026-07-23'},
+      {show:'Pognali unrel.',ep:'Episode 7',s:'2026-07-23',e:'2026-08-06'},
+      {show:'Pognali unrel.',ep:'Episode 8',s:'2026-08-10',e:'2026-08-24'},
+      {show:'Pognali.doc',ep:'Episode 7',s:'2026-08-24',e:'2026-09-07'},
+      {show:'Pognali.doc',ep:'Episode 8',s:'2026-09-08',e:'2026-09-22'},
+      {show:'Pognali.doc',ep:'Africa 2',s:'2026-10-15',e:'2026-10-29'},
+      {show:'Pognali',ep:'Australia 1',s:'2026-11-02',e:'2026-11-16'},
+      {show:'Pognali',ep:'New Zealand',s:'2026-11-16',e:'2026-11-30'}
+  ]},
+  {name:'Аниматор',color:'#97C459',label:'Анимация',tasks:[
+      {show:'Pognali',ep:'Europe 3',s:'2026-01-19',e:'2026-02-02'},
+      {show:'Pognali',ep:'Africa 3',s:'2026-02-02',e:'2026-02-16'},
+      {show:'Pognali',ep:'Africa 4',s:'2026-03-03',e:'2026-03-17'},
+      {show:'Faraway Rada',ep:'Mauritius 2',s:'2026-03-17',e:'2026-03-31'},
+      {show:'Pognali',ep:'Africa 5',s:'2026-03-31',e:'2026-04-14'},
+      {show:'Faraway Ivleeva',ep:'Tanzania',s:'2026-04-16',e:'2026-04-30'},
+      {show:'Pognali.doc',ep:'India 1',s:'2026-04-30',e:'2026-05-14'},
+      {show:'Pognali.doc',ep:'India 2',s:'2026-05-21',e:'2026-06-04'},
+      {show:'Pognali',ep:'Afghanistan 1',s:'2026-06-17',e:'2026-07-01'},
+      {show:'Pognali.doc',ep:'China',s:'2026-07-01',e:'2026-07-15'},
+      {show:'Pognali.doc',ep:'Mongolia',s:'2026-07-17',e:'2026-07-31'},
+      {show:'Faraway Rada',ep:'Episode 10',s:'2026-07-31',e:'2026-08-14'},
+      {show:'Faraway Rada',ep:'Episode 11',s:'2026-08-22',e:'2026-09-05'},
+      {show:'Pognali unrel.',ep:'Episode 9',s:'2026-09-05',e:'2026-09-19'},
+      {show:'Pognali unrel.',ep:'Episode 10',s:'2026-09-23',e:'2026-10-07'},
+      {show:'Pognali.doc',ep:'Episode 10',s:'2026-10-31',e:'2026-11-14'},
+      {show:'Pognali.doc',ep:'Episode 11',s:'2026-11-16',e:'2026-11-30'},
+      {show:'Pognali.doc',ep:'Episode 12',s:'2026-12-02',e:'2026-12-16'}
+  ]},
+];
+
+function getRng(f){
+  if(f==='all') return{s:new Date('2026-01-01'),e:new Date('2026-12-31')};
+  const m=parseInt(f); return{s:new Date(2026,m-1,1),e:new Date(2026,m,0)};
+}
+function toPct(d,rs,rm){return Math.max(0,Math.min(100,((new Date(d)-rs)/rm)*100))}
+
+// Tooltip
+const tt=document.getElementById('tt');
+function showTip(e,t){
+  const dur=Math.round((new Date(t.e)-new Date(t.s))/86400000);
+  tt.innerHTML=`<div class="tt-show">${t.show}</div><div>${t.ep}</div>
+    <div style="margin-top:4px;color:var(--muted)">Начало: <span style="color:var(--text)">${fmt(t.s)}</span></div>
+    <div>Конец: <span style="color:var(--text)">${fmt(t.e)}</span></div>
+    <div>Длит.: <span style="color:var(--text)">${dur} дн.</span></div>`;
+  tt.classList.add('vis'); moveTip(e);
+}
+function moveTip(e){tt.style.left=Math.min(e.clientX+14,window.innerWidth-230)+'px';tt.style.top=(e.clientY-10)+'px';}
+
+// Sync vertical scroll between left and right panels
+let syncLock=false;
+document.addEventListener('DOMContentLoaded',()=>{
+  const gL=document.getElementById('gL');
+  const gRW=document.getElementById('gRW');
+  gL.addEventListener('scroll',()=>{if(!syncLock){syncLock=true;gRW.scrollTop=gL.scrollTop;syncLock=false;}});
+  gRW.addEventListener('scroll',()=>{if(!syncLock){syncLock=true;gL.scrollTop=gRW.scrollTop;syncLock=false;}});
+});
+
+let rowH=30;
+const openState=new Set(); // tracks which persons have breakdown open
+
+function render(){
+  const gL=document.getElementById('gL'); gL.innerHTML='';
+  const gR=document.getElementById('gR'); gR.innerHTML='';
+  const f=document.getElementById('mf').value;
+  const{s:rs,e:re}=getRng(f);
+  const rm=re-rs;
+  const tp=toPct(TODAY,rs,rm);
+  function p(d){return toPct(d,rs,rm)}
+
+  function addGrid(el){
+    const g=document.createElement('div'); g.className='grid-lines';
+    const n=f==='all'?12:4;
+    for(let i=0;i<n;i++){const c=document.createElement('div');c.className='grid-line';g.appendChild(c);}
+    if(tp>=0&&tp<=100){const tl=document.createElement('div');tl.className='today-line';tl.style.left=tp+'%';g.appendChild(tl);}
+    el.appendChild(g);
+  }
+
+  function addRow(lContent, rBuilder, h, extraClass=''){
+    h=h||rowH;
+    const lEl=document.createElement('div');
+    lEl.className='l-row '+(extraClass);
+    lEl.style.height=h+'px';
+    lContent(lEl);
+    gL.appendChild(lEl);
+
+    const rEl=document.createElement('div');
+    rEl.className='r-row '+(extraClass);
+    rEl.style.height=h+'px';
+    addGrid(rEl);
+    rBuilder(rEl);
+    gR.appendChild(rEl);
+    return{lEl,rEl};
+  }
+
+  // Month header
+  const lmH=document.createElement('div'); lmH.className='l-months'; lmH.textContent='СОТРУДНИК / ЗАДАЧА';
+  gL.appendChild(lmH);
+  const rmH=document.createElement('div'); rmH.className='r-months';
+  (f==='all'?MONTHS:['Нед 1','Нед 2','Нед 3','Нед 4']).forEach(m=>{
+    const c=document.createElement('div');c.className='month-cell';c.textContent=m;rmH.appendChild(c);
+  });
+  gR.appendChild(rmH);
+
+  PEOPLE.forEach(person=>{
+    // Person header
+    const lph=document.createElement('div'); lph.className='l-person'; lph.style.color=person.color;
+    const dot=document.createElement('div'); dot.className='person-dot'; dot.style.background=person.color; lph.appendChild(dot);
+    lph.appendChild(document.createTextNode(person.name));
+    gL.appendChild(lph);
+    const rph=document.createElement('div'); rph.className='r-person'; gR.appendChild(rph);
+
+    // Tasks in range
+    const tasks=person.tasks.filter(t=>new Date(t.e)>=rs&&new Date(t.s)<=re);
+
+    // Main row
+    const lMain=document.createElement('div'); lMain.className='l-row'; lMain.style.height=rowH+'px';
+    const lcol=document.createElement('div'); lcol.className='l-col';
+    const lname=document.createElement('span'); lname.className='l-name'; lname.style.color=person.color; lname.textContent=person.label;
+    const lep=document.createElement('span'); lep.className='l-ep'; lep.textContent=person.label;
+    // toggle btn
+    const btn=document.createElement('button'); btn.className='toggle-btn'; btn.textContent='▼'; btn.title='По проектам';
+    btn.style.color=person.color;
+    lcol.appendChild(lname); lMain.appendChild(lcol); lMain.appendChild(btn);
+    gL.appendChild(lMain);
+
+    const rMain=document.createElement('div'); rMain.className='r-row'; rMain.style.height=rowH+'px';
+    addGrid(rMain);
+    tasks.forEach(t=>{
+      const sp=p(t.s),ep2=p(t.e),w=Math.max(0.3,ep2-sp);
+      const bar=document.createElement('div'); bar.className='bar';
+      const bh=Math.max(6,Math.round(rowH*.55));
+      bar.style.cssText=`left:${sp}%;width:${w}%;background:${col(t.show)};height:${bh}px`;
+      bar.addEventListener('mouseenter',e=>showTip(e,t));
+      bar.addEventListener('mousemove',moveTip);
+      bar.addEventListener('mouseleave',()=>tt.classList.remove('vis'));
+      rMain.appendChild(bar);
+    });
+    gR.appendChild(rMain);
+
+    // Sub rows per show
+    const shows=[...new Set(tasks.map(t=>t.show))].sort((a,b)=>{
+      const ai=SHOW_ORDER.indexOf(a),bi=SHOW_ORDER.indexOf(b);
+      return(ai<0?99:ai)-(bi<0?99:bi);
+    });
+    const subPairs=[];
+    shows.forEach(show=>{
+      const showTasks=tasks.filter(t=>t.show===show);
+
+      const lSub=document.createElement('div'); lSub.className='l-row sub-row'; lSub.style.cssText=`height:${rowH}px;display:none;background:rgba(255,255,255,.01)`;
+      const st=document.createElement('span'); st.className='l-sub-text';
+      st.innerHTML=`<span style="opacity:.4;font-size:9px">${person.label} | </span><span style="color:${col(show)}">${show}</span>`;
+      lSub.appendChild(st); gL.appendChild(lSub);
+
+      const rSub=document.createElement('div'); rSub.className='r-row sub-row'; rSub.style.cssText=`height:${rowH}px;display:none;background:rgba(255,255,255,.01)`;
+      addGrid(rSub);
+      const bh=Math.max(5,Math.round(rowH*.42));
+      showTasks.forEach(t=>{
+        const sp=p(t.s),ep2=p(t.e),w=Math.max(0.3,ep2-sp);
+        const bar=document.createElement('div'); bar.className='bar';
+        bar.style.cssText=`left:${sp}%;width:${w}%;background:${col(t.show)};height:${bh}px;opacity:.8`;
+        bar.addEventListener('mouseenter',e=>showTip(e,t));
+        bar.addEventListener('mousemove',moveTip);
+        bar.addEventListener('mouseleave',()=>tt.classList.remove('vis'));
+        rSub.appendChild(bar);
+      });
+      gR.appendChild(rSub);
+      subPairs.push({lSub,rSub});
+    });
+
+    const stateKey=person.name;
+    if(openState.has(stateKey)){
+      subPairs.forEach(({lSub,rSub})=>{lSub.style.display='flex';rSub.style.display='flex';});
+      btn.textContent='▲';
+    }
+    btn.onclick=()=>{
+      const open=subPairs.length>0&&subPairs[0].lSub.style.display!=='none';
+      if(open) openState.delete(stateKey); else openState.add(stateKey);
+      subPairs.forEach(({lSub,rSub})=>{lSub.style.display=open?'none':'flex';rSub.style.display=open?'none':'flex';});
+      btn.textContent=open?'▼':'▲';
+      requestAnimationFrame(syncHeights);
+    };
+
+    // Summary row
+    const byShow={};let totalEp=0,totalDays=0;
+    tasks.forEach(t=>{byShow[t.show]=(byShow[t.show]||0)+1;totalEp++;totalDays+=Math.round((new Date(t.e)-new Date(t.s))/86400000);});
+
+    const lSum=document.createElement('div'); lSum.className='l-row l-sum';
+    lSum.style.minHeight='26px';
+    const lSumTxt=document.createElement('span'); lSumTxt.style.cssText='font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em'; lSumTxt.textContent='Итого / окна';
+    lSum.appendChild(lSumTxt); gL.appendChild(lSum);
+
+    const rSum=document.createElement('div'); rSum.className='r-sum';
+    const stat=document.createElement('span'); stat.className='sum-stat';
+    stat.innerHTML=`<strong>${totalEp}</strong> эп. · <strong>${Math.round(totalDays/7)}</strong> нед.`;
+    rSum.appendChild(stat);
+    Object.entries(byShow).forEach(([show,cnt])=>{
+      const ch=document.createElement('span'); ch.className='chip';
+      const c=col(show); ch.style.borderColor=c; ch.style.color=c;
+      ch.textContent=`${show.replace(' unrel.','★').replace('Faraway ','')} ×${cnt}`; rSum.appendChild(ch);
+    });
+
+    gR.appendChild(rSum);
+  });
+  // Sync row heights after DOM is painted
+  requestAnimationFrame(()=>requestAnimationFrame(syncHeights));
+}
+
+function syncHeights(){
+  // Only sync sum rows (variable height due to chip wrapping)
+  const lSums=document.querySelectorAll('#gL .l-sum');
+  const rSums=document.querySelectorAll('#gR .r-sum');
+  const n=Math.min(lSums.length,rSums.length);
+  for(let i=0;i<n;i++){
+    lSums[i].style.height='';
+    rSums[i].style.height='';
+    const h=Math.max(lSums[i].scrollHeight, rSums[i].scrollHeight, 26);
+    lSums[i].style.height=h+'px';
+    rSums[i].style.height=h+'px';
+  }
+}
+
+function setH(v){
+  rowH=parseInt(v);
+  document.getElementById('rhv').textContent=v+'px';
+  render(); // openState preserves which rows are open
+}
+
+function toggleTheme(){
+  const r=document.documentElement,b=document.getElementById('themeBtn');
+  r.classList.toggle('light'); b.textContent=r.classList.contains('light')?'☾ Тёмная':'☀ Светлая';
+}
+
+render();
+setTimeout(syncHeights,50);
+</script>
+</body>
+</html>

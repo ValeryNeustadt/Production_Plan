@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Диаграмма Ганта — Сценарии 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Unbounded:wght@300;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #151820;
+    --border: #1e2330;
+    --text: #e8eaf0;
+    --muted: #4a5060;
+    --accent: #00d4aa;
+  }
+
+  :root.light {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --border: #dde1ea;
+    --text: #1a1d26;
+    --muted: #8a93a8;
+    --accent: #00a887;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .gantt-scroll-y {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  header h1 {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+
+  header span { color: var(--muted); font-size: 11px; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    padding: 14px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 7px;
+    cursor: pointer; user-select: none; transition: opacity .2s;
+  }
+  .legend-item.hidden { opacity: 0.3; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+  .legend-label { color: var(--text); font-size: 11px; }
+
+  .filter-bar {
+    padding: 10px 32px;
+    display: flex; gap: 8px; align-items: center;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .filter-bar label { color: var(--muted); font-size: 11px; margin-right: 4px; }
+  select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .gantt-wrapper {
+    overflow-x: auto;
+    max-height: calc(100vh - 180px);
+    position: relative;
+  }
+
+
+
+  .gantt-inner {
+    min-width: 1400px;
+    position: relative;
+  }
+
+  /* ── sticky header block: months + load row ── */
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+  }
+
+  .month-header {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* load row */
+  .load-row {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    height: 48px;
+    background: var(--bg);
+    position: relative;
+  }
+
+  .row-label-col {
+    width: 260px; min-width: 260px; flex-shrink: 0;
+    padding: 8px 12px;
+    border-right: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background: var(--bg);
+  }
+
+  .month-cols { display: flex; flex: 1; }
+  .month-cell {
+    flex: 1; text-align: center; padding: 8px 4px;
+    font-size: 10px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .08em;
+    border-right: 1px solid var(--border);
+  }
+  .month-cell:last-child { border-right: none; }
+
+  /* load chart area */
+  .load-chart {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .load-bar {
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transition: opacity .15s;
+    cursor: default;
+  }
+  .load-bar-inner {
+    width: 100%;
+    border-radius: 2px 2px 0 0;
+    transition: height .3s ease;
+  }
+  .load-label {
+    position: absolute;
+    bottom: 2px;
+    width: 100%;
+    text-align: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    pointer-events: none;
+    line-height: 1;
+  }
+  .load-label.top {
+    bottom: auto;
+    top: 2px;
+    color: var(--muted);
+  }
+  /* week separator ticks */
+  .load-tick {
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    width: 1px;
+    background: var(--border);
+    pointer-events: none;
+  }
+
+  /* gantt rows */
+  .gantt-row:hover { background: rgba(255,255,255,.02); }
+  .row-show { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }
+  .row-episode { font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+
+
+  .grid-lines { position: absolute; inset: 0; display: flex; pointer-events: none; }
+  .grid-line { flex: 1; border-right: 1px solid var(--border); }
+  .grid-line:last-child { border-right: none; }
+
+  .today-line {
+    position: absolute; top: 0; bottom: 0;
+    width: 2px; background: var(--accent);
+    opacity: 0.5; z-index: 3; pointer-events: none;
+  }
+
+  .bar {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    height: 18px; border-radius: 3px;
+    opacity: 0.88; transition: opacity .15s, transform .15s;
+    cursor: pointer; z-index: 2;
+  }
+  .bar:hover { opacity: 1; transform: translateY(-50%) scaleY(1.15); }
+
+  .group-header {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 5px 12px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: .05em; text-transform: uppercase;
+  }
+
+  .tooltip {
+    display: none; position: fixed;
+    background: var(--surface); border: 1px solid var(--accent);
+    color: var(--text); padding: 10px 14px;
+    border-radius: 6px; font-size: 11px; line-height: 1.7;
+    z-index: 1000; pointer-events: none; max-width: 240px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  }
+  .tooltip.visible { display: block; }
+  .tooltip-show { color: var(--accent); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+
+  /* ── theme toggle ── */
+  .theme-toggle {
+    margin-left: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background .2s, border-color .2s;
+  }
+  .theme-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── row height control ── */
+  :root { --row-h: 34px; --label-show: 1; }
+
+  .gantt-row {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    height: var(--row-h);
+    min-height: unset;
+    align-items: center;
+    transition: background .15s, height .2s;
+    overflow: hidden;
+  }
+  .chart-area {
+    flex: 1;
+    position: relative;
+    height: var(--row-h);
+    transition: height .2s;
+  }
+  .row-label {
+    width: 260px; min-width: 260px; flex-shrink: 0;
+    padding: 4px 12px;
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 2px;
+    justify-content: center;
+    position: sticky; left: 0;
+    background: var(--surface); z-index: 5;
+    height: 100%;
+    overflow: hidden;
+    transition: width .2s, min-width .2s;
+  }
+
+  /* compact: hide show-name sub-label */
+  .compact-labels .row-show { display: none; }
+  .compact-labels .row-episode { font-size: 10px; }
+
+  /* minimal: hide entire label column */
+  .no-labels .row-label { width: 0; min-width: 0; padding: 0; border-right: none; overflow: hidden; }
+  .no-labels .row-label-col { width: 0; min-width: 0; padding: 0; border-right: none; overflow: hidden; }
+  .no-labels .group-header { padding-left: 4px; }
+
+  /* height slider */
+  .height-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 16px;
+  }
+  .height-control label {
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    white-space: nowrap;
+  }
+  .height-control input[type=range] {
+    width: 90px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .height-val {
+    color: var(--accent);
+    font-size: 10px;
+    min-width: 28px;
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>СЦЕНАРИИ 2026</h1>
+  <span>Дата начала → Дата окончания сценария</span>
+  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀ Светлая</button>
+</header>
+
+<div class="legend" id="legend"></div>
+
+<div class="filter-bar">
+  <label>Период:</label>
+  <select id="monthFilter" onchange="render()">
+    <option value="all">Весь год</option>
+    <option value="1">Янв</option><option value="2">Фев</option>
+    <option value="3">Мар</option><option value="4">Апр</option>
+    <option value="5">Май</option><option value="6">Июн</option>
+    <option value="7">Июл</option><option value="8">Авг</option>
+    <option value="9">Сен</option><option value="10">Окт</option>
+    <option value="11">Ноя</option><option value="12">Дек</option>
+  </select>
+  <div class="height-control">
+    <label>Высота строк:</label>
+    <input type="range" id="rowHeightSlider" min="12" max="48" value="34" step="1" oninput="updateRowHeight(this.value)">
+    <span class="height-val" id="rowHeightVal">34px</span>
+  </div>
+</div>
+
+<div class="gantt-scroll-y">
+<div class="gantt-wrapper">
+  <div class="gantt-inner" id="ganttInner"></div>
+</div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const SHOWS = {
+  'Pognali':             { color: '#3b82f6', label: 'Pognali' },
+  'Faraway Rada':        { color: '#a855f7', label: 'Faraway Rada' },
+  'Faraway Ivleeva':     { color: '#f59e0b', label: 'Faraway Ivleeva' },
+  'Pognali.doc':         { color: '#06b6d4', label: 'Pognali.doc' },
+  'Pognali unreleased':  { color: '#84cc16', label: 'Pognali unreleased' },
+};
+
+const MONTHS = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+
+const RAW = [
+  ['Pognali','Africa 2 (Ethiopia 1_Mursi)','2026-01-05','2026-01-05'],
+  ['Pognali','Europe 3 (Spain 2)','2026-01-12','2026-01-26'],
+  ['Pognali','Africa 3 (Ghana 1)','2026-01-26','2026-02-09'],
+  ['Pognali','Europe 4 (Sicily_mafia)','2026-02-10','2026-02-24'],
+  ['Pognali','Africa 4 (Ethiopia 2_Hamer tribes)','2026-02-24','2026-03-10'],
+  ['Pognali','USA 8_food','2026-03-10','2026-03-24'],
+  ['Pognali','Africa 5 (Johannesburg)','2026-03-20','2026-04-03'],
+  ['Pognali','India 3 (trains)','2026-04-13','2026-04-27'],
+  ['Pognali','DPRK 5 (politics)','2026-04-24','2026-05-08'],
+  ['Pognali','Afghanistan 1','2026-06-10','2026-06-24'],
+  ['Pognali','Pakistan 1','2026-06-24','2026-07-08'],
+  ['Pognali','Iran 1','2026-07-08','2026-07-22'],
+  ['Pognali','Afghanistan 2','2026-07-22','2026-08-05'],
+  ['Pognali','Pakistan 2','2026-08-05','2026-08-19'],
+  ['Pognali','Iran 2','2026-08-19','2026-09-02'],
+  ['Pognali','Australia 1','2026-10-26','2026-11-09'],
+  ['Pognali','New Zealand','2026-11-09','2026-11-23'],
+  ['Pognali','Indonesia 1','2026-11-23','2026-12-07'],
+  ['Faraway Rada','Zanzibar 1','2026-01-06','2026-01-20'],
+  ['Faraway Rada','Zanzibar 2','2026-01-21','2026-02-10'],
+  ['Faraway Rada','Mauritius 1','2026-02-11','2026-03-03'],
+  ['Faraway Rada','Mauritius 2','2026-03-04','2026-03-24'],
+  ['Faraway Rada','Seychelles','2026-03-25','2026-04-14'],
+  ['Faraway Rada','Episode 8','2026-05-24','2026-06-14'],
+  ['Faraway Rada','Episode 9','2026-06-18','2026-07-09'],
+  ['Faraway Rada','Episode 10','2026-07-23','2026-08-13'],
+  ['Faraway Rada','Episode 11','2026-08-15','2026-09-05'],
+  ['Faraway Rada','Episode 12','2026-09-07','2026-09-28'],
+  ['Faraway Ivleeva','Ethiopia','2026-03-17','2026-04-07'],
+  ['Faraway Ivleeva','Tanzania','2026-04-09','2026-04-30'],
+  ['Pognali.doc','Brazil 2','2026-01-12','2026-01-26'],
+  ['Pognali.doc','Mexico 2','2026-01-26','2026-02-09'],
+  ['Pognali.doc','Africa 1 (ETHIOPIA)','2026-03-02','2026-03-13'],
+  ['Pognali.doc','Sicilian mafia','2026-02-27','2026-03-20'],
+  ['Pognali.doc','India 1','2026-04-18','2026-05-09'],
+  ['Pognali.doc','India 2','2026-05-14','2026-06-04'],
+  ['Pognali.doc','China','2026-06-24','2026-07-08'],
+  ['Pognali.doc','Mongolia','2026-07-10','2026-07-24'],
+  ['Pognali.doc','Episode 7','2026-08-16','2026-08-30'],
+  ['Pognali.doc','Episode 8','2026-09-01','2026-09-15'],
+  ['Pognali.doc','Africa 2','2026-10-08','2026-10-22'],
+  ['Pognali.doc','Episode 10','2026-10-24','2026-11-07'],
+  ['Pognali.doc','Episode 11','2026-11-09','2026-11-23'],
+  ['Pognali.doc','Episode 12','2026-11-25','2026-12-09'],
+  ['Pognali unreleased','VARANASI','2026-03-30','2026-03-30'],
+  ['Pognali unreleased','INDIAN TRAIN','2026-03-24','2026-04-14'],
+  ['Pognali unreleased','EDA','2026-04-15','2026-05-06'],
+  ['Pognali unreleased','Episode 4','2026-05-07','2026-05-28'],
+  ['Pognali unreleased','Episode 5','2026-05-29','2026-06-19'],
+  ['Pognali unreleased','Episode 6','2026-06-20','2026-07-11'],
+  ['Pognali unreleased','Episode 7','2026-07-12','2026-08-02'],
+  ['Pognali unreleased','Episode 8','2026-08-03','2026-08-24'],
+  ['Pognali unreleased','Episode 9','2026-08-25','2026-09-15'],
+  ['Pognali unreleased','Episode 10','2026-09-16','2026-10-07'],
+  ['Pognali unreleased','Episode 11','2026-10-08','2026-10-29'],
+  ['Pognali unreleased','Episode 12','2026-10-30','2026-11-20'],
+];
+
+// All weeks of 2026 (Mon–Sun)
+function getAllWeeks() {
+  const weeks = [];
+  // Find first Monday on or before Jan 1 2026
+  let d = new Date('2026-01-01');
+  while (d.getDay() !== 1) d = new Date(d.getTime() - 86400000);
+  while (d < new Date('2027-01-01')) {
+    const start = new Date(d);
+    const end = new Date(d.getTime() + 6 * 86400000);
+    weeks.push({ start, end });
+    d = new Date(d.getTime() + 7 * 86400000);
+  }
+  return weeks;
+}
+
+const ALL_WEEKS = getAllWeeks();
+
+// Normalize RAW: if episode A starts on the same day episode B (same show) ends,
+// shift A's start +1 day so they no longer overlap even for a single day.
+(function normalizeRAW() {
+  RAW.forEach((rowA, i) => {
+    RAW.forEach((rowB, j) => {
+      if (i === j || rowA[0] !== rowB[0]) return;
+      if (rowA[2] === rowB[3]) {
+        const d = new Date(rowA[2]);
+        d.setDate(d.getDate() + 1);
+        rowA[2] = d.toISOString().slice(0, 10);
+      }
+    });
+  });
+})();
+
+// Count overlapping projects per week (always all shows)
+// Rule: if multiple episodes of the SAME show both touch a given week
+// (end of one and start of next both fall within the same week),
+// they are treated as ONE continuous project for that week.
+function computeLoad(weeks) {
+  return weeks.map(w => {
+    let full = 0, partial = 0;
+
+    const showEpisodes = {};
+    RAW.forEach(row => {
+      if (hiddenShows.has(row[0])) return;
+      const s = new Date(row[2]);
+      const e = new Date(row[3]);
+      if (s > w.end || e < w.start) return;
+      if (!showEpisodes[row[0]]) showEpisodes[row[0]] = [];
+      showEpisodes[row[0]].push({ s, e });
+    });
+
+    Object.values(showEpisodes).forEach(episodes => {
+      episodes.sort((a, b) => a.s - b.s);
+      // Merge episodes that are both touching this same week
+      // (i.e. both fall within [w.start, w.end] — transition happens inside the week)
+      const merged = [{ s: episodes[0].s, e: episodes[0].e }];
+      for (let i = 1; i < episodes.length; i++) {
+        const last = merged[merged.length - 1];
+        // Both the end of previous and start of next are within this week => same project
+        const prevEndInWeek  = last.e >= w.start && last.e <= w.end;
+        const nextStartInWeek = episodes[i].s >= w.start && episodes[i].s <= w.end;
+        if (prevEndInWeek && nextStartInWeek) {
+          // Transition inside this week: merge into one logical project
+          if (episodes[i].e > last.e) last.e = episodes[i].e;
+        } else {
+          merged.push({ s: episodes[i].s, e: episodes[i].e });
+        }
+      }
+      merged.forEach(({ s, e }) => {
+        if (s <= w.start && e >= w.end) full++;
+        else partial++;
+      });
+    });
+
+    return { full, partial };
+  });
+}
+
+const tooltip = document.getElementById('tooltip');
+let hiddenShows = new Set();
+
+function showTooltip(e, row) {
+  const dur = Math.round((new Date(row[3]) - new Date(row[2])) / 86400000);
+  tooltip.innerHTML = `
+    <div class="tooltip-show">${row[0]}</div>
+    <div>${row[1]}</div>
+    <div style="margin-top:6px;color:var(--muted)">Начало: <span style="color:var(--text)">${fmtDate(row[2])}</span></div>
+    <div>Дедлайн: <span style="color:var(--text)">${fmtDate(row[3])}</span></div>
+    <div>Длит.: <span style="color:var(--text)">${dur > 0 ? dur+' дн.' : '< 1 дня'}</span></div>
+  `;
+  tooltip.classList.add('visible');
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  let x = e.clientX + 16, y = e.clientY - 10;
+  if (x + 250 > window.innerWidth) x = e.clientX - 260;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top  = y + 'px';
+}
+function fmtDate(s) {
+  return new Date(s).toLocaleDateString('ru-RU', {day:'numeric', month:'short'});
+}
+
+// Legend
+const legendEl = document.getElementById('legend');
+Object.entries(SHOWS).forEach(([key, {color, label}]) => {
+  const item = document.createElement('label');
+  item.className = 'legend-item';
+  item.style.cursor = 'pointer';
+
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.checked = true;
+  cb.style.cssText = 'accent-color:' + color + ';width:14px;height:14px;cursor:pointer;flex-shrink:0;';
+  cb.addEventListener('change', () => {
+    if (cb.checked) hiddenShows.delete(key);
+    else hiddenShows.add(key);
+    render();
+  });
+
+  const dot = document.createElement('div');
+  dot.className = 'legend-dot';
+  dot.style.background = color;
+
+  const lbl = document.createElement('span');
+  lbl.className = 'legend-label';
+  lbl.textContent = label;
+
+  item.appendChild(cb);
+  item.appendChild(dot);
+  item.appendChild(lbl);
+  legendEl.appendChild(item);
+});
+
+function loadColor(n, max) {
+  // green → yellow → red
+  const t = Math.min(n / max, 1);
+  if (t < 0.5) {
+    const r = Math.round(255 * (t * 2));
+    return `rgb(${r},200,80)`;
+  } else {
+    const g = Math.round(200 * (1 - (t - 0.5) * 2));
+    return `rgb(255,${g},60)`;
+  }
+}
+
+function render() {
+  const filterMonth = document.getElementById('monthFilter').value;
+  const inner = document.getElementById('ganttInner');
+  inner.innerHTML = '';
+
+  let rangeStart, rangeEnd;
+  if (filterMonth === 'all') {
+    rangeStart = new Date('2026-01-01');
+    rangeEnd   = new Date('2026-12-31');
+  } else {
+    const m = parseInt(filterMonth) - 1;
+    rangeStart = new Date(2026, m, 1);
+    rangeEnd   = new Date(2026, m+1, 0);
+  }
+  const rangeMs = rangeEnd - rangeStart;
+
+  function toPct(date) {
+    return Math.max(0, Math.min(100, ((date - rangeStart) / rangeMs) * 100));
+  }
+  function toPctStr(dateStr) { return toPct(new Date(dateStr)); }
+
+  // Today line
+  const today = new Date('2026-06-03');
+  const todayPct = toPct(today);
+
+  // Weeks visible in range
+  const visibleWeeks = ALL_WEEKS.filter(w => w.end >= rangeStart && w.start <= rangeEnd);
+  const loads = computeLoad(visibleWeeks);
+  // maxLoad computed per row below
+
+  // ── STICKY HEADER ──
+  const stickyHeader = document.createElement('div');
+  stickyHeader.className = 'sticky-header';
+
+  // Month row
+  const monthHeader = document.createElement('div');
+  monthHeader.className = 'month-header';
+  const lc1 = document.createElement('div');
+  lc1.className = 'row-label-col';
+  lc1.textContent = 'ПРОЕКТ / ЭПИЗОД';
+  monthHeader.appendChild(lc1);
+
+  const monthCols = document.createElement('div');
+  monthCols.className = 'month-cols';
+  if (filterMonth === 'all') {
+    MONTHS.forEach(m => {
+      const cell = document.createElement('div');
+      cell.className = 'month-cell';
+      cell.textContent = m;
+      monthCols.appendChild(cell);
+    });
+  } else {
+    ['Нед 1','Нед 2','Нед 3','Нед 4'].forEach(w => {
+      const cell = document.createElement('div');
+      cell.className = 'month-cell';
+      cell.textContent = w;
+      monthCols.appendChild(cell);
+    });
+  }
+  monthHeader.appendChild(monthCols);
+  stickyHeader.appendChild(monthHeader);
+
+  function buildLoadRow(labelText, getValue, colorFn, maxVal) {
+    const row = document.createElement('div');
+    row.className = 'load-row';
+
+    const lc = document.createElement('div');
+    lc.className = 'row-label-col';
+    lc.textContent = labelText;
+    row.appendChild(lc);
+
+    const chart = document.createElement('div');
+    chart.className = 'load-chart';
+
+    visibleWeeks.forEach((w, i) => {
+      const count = getValue(loads[i]);
+      if (count === 0) return;
+
+      const leftPct  = toPct(w.start);
+      const rightPct = toPct(new Date(w.end.getTime() + 86400000));
+      const wPct = Math.max(0, rightPct - leftPct);
+      if (wPct <= 0) return;
+
+      const heightPct = Math.max(15, (count / maxVal) * 85);
+      const color = colorFn(count, maxVal);
+
+      const bar = document.createElement('div');
+      bar.className = 'load-bar';
+      bar.style.left   = leftPct + '%';
+      bar.style.width  = wPct + '%';
+      bar.style.height = '100%';
+
+      const inner2 = document.createElement('div');
+      inner2.className = 'load-bar-inner';
+      inner2.style.height = heightPct + '%';
+      inner2.style.background = color;
+      inner2.style.opacity = '0.75';
+      bar.appendChild(inner2);
+
+      const lbl = document.createElement('div');
+      lbl.className = 'load-label';
+      lbl.textContent = count;
+      bar.appendChild(lbl);
+
+      bar.title = `Неделя ${fmtDate(w.start.toISOString().slice(0,10))} – ${fmtDate(w.end.toISOString().slice(0,10))}: ${count}`;
+      chart.appendChild(bar);
+    });
+
+    if (todayPct >= 0 && todayPct <= 100) {
+      const tl = document.createElement('div');
+      tl.style.cssText = `position:absolute;top:0;bottom:0;left:${todayPct}%;width:2px;background:var(--accent);opacity:0.5;z-index:3;pointer-events:none;`;
+      chart.appendChild(tl);
+    }
+
+    row.appendChild(chart);
+    return row;
+  }
+
+  const maxFull    = Math.max(...loads.map(l => l.full), 1);
+  const maxPartial = Math.max(...loads.map(l => l.partial), 1);
+
+  stickyHeader.appendChild(buildLoadRow(
+    'ПОЛНЫЕ / НЕД.',
+    l => l.full,
+    loadColor,
+    maxFull
+  ));
+
+  stickyHeader.appendChild(buildLoadRow(
+    'ЧАСТИЧНЫЕ / НЕД.',
+    l => l.partial,
+    (n, max) => {
+      const t = Math.min(n / max, 1);
+      const b = Math.round(120 + 135 * t);
+      const g = Math.round(160 - 80 * t);
+      return `rgb(60,${g},${b})`;
+    },
+    maxPartial
+  ));
+  inner.appendChild(stickyHeader);
+
+  // ── GANTT ROWS ──
+  const groups = {};
+  RAW.forEach(row => {
+    if (!groups[row[0]]) groups[row[0]] = [];
+    groups[row[0]].push(row);
+  });
+
+  Object.entries(groups).forEach(([show, rows]) => {
+    if (hiddenShows.has(show)) return;
+
+    const gh = document.createElement('div');
+    gh.className = 'group-header';
+    gh.style.color = SHOWS[show]?.color || '#888';
+    gh.textContent = SHOWS[show]?.label || show;
+    inner.appendChild(gh);
+
+    rows.forEach(row => {
+      const start = new Date(row[2]);
+      const end   = new Date(row[3]);
+      if (end < rangeStart || start > rangeEnd) return;
+
+      const tr = document.createElement('div');
+      tr.className = 'gantt-row';
+
+      const lbl = document.createElement('div');
+      lbl.className = 'row-label';
+      lbl.innerHTML = `<span class="row-show" style="color:${SHOWS[show]?.color||'#888'}">${show}</span><span class="row-episode">${row[1]}</span>`;
+      tr.appendChild(lbl);
+
+      const area = document.createElement('div');
+      area.className = 'chart-area';
+
+      // grid
+      const grid = document.createElement('div');
+      grid.className = 'grid-lines';
+      const cols = filterMonth === 'all' ? 12 : 4;
+      for (let i = 0; i < cols; i++) {
+        const gl = document.createElement('div'); gl.className = 'grid-line'; grid.appendChild(gl);
+      }
+      area.appendChild(grid);
+
+      // today
+      if (todayPct >= 0 && todayPct <= 100) {
+        const tl = document.createElement('div');
+        tl.className = 'today-line';
+        tl.style.left = todayPct + '%';
+        area.appendChild(tl);
+      }
+
+      // bar
+      const sPct = toPctStr(row[2]);
+      const ePct = toPctStr(row[3]);
+      const wPct = Math.max(0.4, ePct - sPct);
+
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.style.left = sPct + '%';
+      bar.style.width = wPct + '%';
+      bar.style.background = SHOWS[show]?.color || '#888';
+      bar.addEventListener('mouseenter', e => showTooltip(e, row));
+      bar.addEventListener('mousemove', moveTooltip);
+      bar.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+      area.appendChild(bar);
+
+      tr.appendChild(area);
+      inner.appendChild(tr);
+    });
+  });
+}
+
+render();
+
+
+function updateRowHeight(val) {
+  val = parseInt(val);
+  document.getElementById('rowHeightVal').textContent = val + 'px';
+  document.documentElement.style.setProperty('--row-h', val + 'px');
+
+  const inner = document.getElementById('ganttInner');
+  // label visibility modes based on height
+  if (val <= 16) {
+    // so small — hide labels entirely
+    inner.classList.add('no-labels');
+    inner.classList.remove('compact-labels');
+  } else if (val <= 26) {
+    // compact — show only episode name, no show sub-label
+    inner.classList.add('compact-labels');
+    inner.classList.remove('no-labels');
+  } else {
+    // full — show everything
+    inner.classList.remove('no-labels');
+    inner.classList.remove('compact-labels');
+  }
+
+  // also scale bar height proportionally
+  const barH = Math.max(4, Math.round(val * 0.52));
+  document.querySelectorAll('.bar').forEach(b => {
+    b.style.height = barH + 'px';
+  });
+}
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const btn = document.getElementById('themeBtn');
+  if (root.classList.contains('light')) {
+    root.classList.remove('light');
+    btn.textContent = '☀ Светлая';
+  } else {
+    root.classList.add('light');
+    btn.textContent = '☾ Тёмная';
+  }
+}
+</script>
+</body>
+</html>
