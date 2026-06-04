@@ -22,7 +22,7 @@ body{background:var(--bg);color:var(--text);font-family:"JetBrains Mono",monospa
 .global-theme{flex-shrink:0;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:"JetBrains Mono",monospace;font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;}
 .global-theme:hover{border-color:var(--accent);color:var(--accent);}
 .sec-gantt{display:flex;flex-direction:column;overflow:hidden;border-bottom:3px solid var(--border);}
-.sec-scroll{padding:28px 0;border-bottom:3px solid var(--border);}
+.sec-scroll{padding:28px;border-bottom:3px solid var(--border);}
 .sec-scroll:last-child{border-bottom:none;}
 #sec1{--row-h:34px;--label-show:1;}
 #sec1 .gantt-scroll-y{overflow-y:auto;overflow-x:auto;}
@@ -482,8 +482,7 @@ select{background:var(--surface);border:1px solid var(--border);color:var(--text
 .tooltip.vis{display:block}
 .tt-show{color:var(--accent);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.08em}
  }
-#sec3,#sec4,#sec-storage { padding:28px 0;border-bottom:3px solid var(--border); }
-#sec-storage > * { max-width:1060px;margin:0 auto;padding:0 28px; }
+#sec3,#sec4,#sec-storage { padding:28px;border-bottom:3px solid var(--border);max-width:1060px;margin:0 auto;box-sizing:border-box;width:100%; }
 #sec-storage .divider{ margin:20px 0;background:var(--border);height:1px; }
 #sec-storage { 
 :root{--bg:#0d0f14;--surface:#151820;--border:#1e2330;--text:#e8eaf0;--muted:#4a5060;--accent:#00d4aa;}
@@ -743,8 +742,7 @@ h1{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:600;color:var(-
 .budget-total-val{font-size:16px;font-weight:600;color:var(--accent);}
 .budget-note{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6;}
  }
-#sec-storage { padding:28px 0;border-bottom:3px solid var(--border); }
-#sec-storage > * { max-width:1060px;margin:0 auto;padding:0 28px; }
+#sec-storage { padding:28px;border-bottom:3px solid var(--border);max-width:1060px;margin:0 auto;box-sizing:border-box;width:100%; }
 #sec-storage .divider{ margin:20px 0;background:var(--border);height:1px; }
 #sec-storage { 
 :root{--bg:#0d0f14;--surface:#151820;--border:#1e2330;--text:#e8eaf0;--muted:#4a5060;--accent:#00d4aa;}
